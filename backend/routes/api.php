@@ -21,6 +21,22 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password/send-otp', [AuthController::class, 'sendResetOtp']);
 Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyResetOtp']);
 Route::post('/forgot-password/reset', [AuthController::class, 'resetPasswordWithOtp']);
+
+Route::get('/init-db', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database migrated successfully!',
+            'output' => \Illuminate\Support\Facades\Artisan::output(),
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+});
              
 Route::get('/test-students', function () {
     return response()->json(
@@ -28,6 +44,19 @@ Route::get('/test-students', function () {
             ->latest()
             ->paginate(25)
     );
+});
+
+Route::get('/db-info', function () {
+    return response()->json([
+        'driver' => \Illuminate\Support\Facades\DB::getDriverName(),
+        'database' => \Illuminate\Support\Facades\DB::getDatabaseName(),
+        'connection' => config('database.default'),
+        'base_path' => base_path(),
+        'public_html' => realpath(base_path('..')),
+        'env_file_exists' => file_exists(base_path('.env')),
+        'db_connection_env' => env('DB_CONNECTION'),
+        'db_database_env' => env('DB_DATABASE'),
+    ]);
 });
 
 

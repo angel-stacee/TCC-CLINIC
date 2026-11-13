@@ -41,7 +41,6 @@ export default function Login(): React.JSX.Element {
     const [forgotSuccessMessage, setForgotSuccessMessage] = useState("");
     const [forgotLoading, setForgotLoading] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
-    const [devOtp, setDevOtp] = useState<string | null>(null);
 
     useEffect(() => {
         if (resendCooldown <= 0) return;
@@ -59,7 +58,6 @@ export default function Login(): React.JSX.Element {
         setForgotPasswordConfirm("");
         setForgotError("");
         setForgotSuccessMessage("");
-        setDevOtp(null);
     };
 
     const handleSendOtp = async (e?: React.FormEvent) => {
@@ -84,10 +82,8 @@ export default function Login(): React.JSX.Element {
             const msg =
                 response.data?.message ||
                 `A 6-digit OTP verification code has been sent to ${cleanEmail}.`;
-            const returnedDevOtp = response.data?.dev_otp || null;
             setForgotSuccessMessage(msg);
-            setDevOtp(returnedDevOtp);
-            setForgotOtp(returnedDevOtp || "");
+            setForgotOtp("");
             setForgotStep("otp");
             setResendCooldown(15);
         } catch (err: any) {
@@ -547,25 +543,7 @@ export default function Login(): React.JSX.Element {
                                     </div>
                                 )}
 
-                                {devOtp && (
-                                    <div className="rounded-xl border border-amber-400/40 bg-amber-950/60 p-3 text-xs text-amber-200">
-                                        <div className="flex items-center justify-between">
-                                            <span>
-                                                <strong>OTP Code:</strong>{" "}
-                                                <span className="font-mono text-sm font-bold tracking-widest text-[#f59e0b]">
-                                                    {devOtp}
-                                                </span>
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => setForgotOtp(devOtp)}
-                                                className="rounded-lg bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-300 transition hover:bg-amber-500/30"
-                                            >
-                                                Auto-filled
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+
 
                                 <div>
                                     <label

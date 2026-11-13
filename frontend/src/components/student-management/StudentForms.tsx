@@ -9,6 +9,15 @@ const COURSES = ["BSIT", "BSBA", "MidWifery", "BSHM", "BLIS", "BSED", "BSCRIM"];
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SEX_OPTIONS = ["Male", "Female"];
 
+// Disallow special characters for IDs (allows alphanumeric and hyphens e.g. 20241041, FAC-001)
+const sanitizeId = (val: string) => val.replace(/[^a-zA-Z0-9-]/g, "");
+
+// Disallow numbers and special characters for names (allows letters, spaces, hyphens, periods, apostrophes, and Philippine letters like ñ/Ñ)
+const sanitizeName = (val: string) => val.replace(/[0-9]/g, "").replace(/[^a-zA-Z\sñÑ\-.']/g, "");
+
+// Allow digits only (and optional leading +) for phone numbers
+const sanitizePhone = (val: string) => val.replace(/[^0-9+]/g, "").slice(0, 15);
+
 type StudentFormsProps = { showStudentForm: boolean; editingStudent: boolean; closeStudentForm: () => void; handleStudentSubmit: React.FormEventHandler<HTMLFormElement>; studentForm: StudentFormValues; setStudentForm: React.Dispatch<React.SetStateAction<StudentFormValues>>; saving: boolean; showStaffForm: boolean; editingStaff: boolean; closeStaffForm: () => void; handleStaffSubmit: React.FormEventHandler<HTMLFormElement>; staffForm: StaffFormValues; setStaffForm: React.Dispatch<React.SetStateAction<StaffFormValues>>; showFacultyForm: boolean; editingFaculty: boolean; closeFacultyForm: () => void; handleFacultySubmit: React.FormEventHandler<HTMLFormElement>; facultyForm: FacultyFormValues; setFacultyForm: React.Dispatch<React.SetStateAction<FacultyFormValues>>; };
 
 export function StudentForms({ showStudentForm, editingStudent, closeStudentForm, handleStudentSubmit, studentForm, setStudentForm, saving, showStaffForm, editingStaff, closeStaffForm, handleStaffSubmit, staffForm, setStaffForm, showFacultyForm, editingFaculty, closeFacultyForm, handleFacultySubmit, facultyForm, setFacultyForm }: StudentFormsProps) {
@@ -38,7 +47,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStudentForm({
                                         ...studentForm,
                                         student_id:
-                                            e.target.value,
+                                            sanitizeId(e.target.value),
                                     })
                                 }
                                 required
@@ -53,7 +62,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStudentForm({
                                         ...studentForm,
                                         first_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                                 required
@@ -68,7 +77,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStudentForm({
                                         ...studentForm,
                                         middle_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                             />
@@ -82,7 +91,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStudentForm({
                                         ...studentForm,
                                         last_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                                 required
@@ -176,7 +185,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStudentForm({
                                         ...studentForm,
                                         contact_number:
-                                            e.target.value,
+                                            sanitizePhone(e.target.value),
                                     })
                                 }
                                 required
@@ -254,7 +263,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStaffForm({
                                         ...staffForm,
                                         staff_id:
-                                            e.target.value,
+                                            sanitizeId(e.target.value),
                                     })
                                 }
                                 required
@@ -269,7 +278,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStaffForm({
                                         ...staffForm,
                                         first_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                                 required
@@ -284,7 +293,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStaffForm({
                                         ...staffForm,
                                         middle_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                             />
@@ -298,7 +307,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStaffForm({
                                         ...staffForm,
                                         last_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                                 required
@@ -373,7 +382,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStaffForm({
                                         ...staffForm,
                                         contact_number:
-                                            e.target.value,
+                                            sanitizePhone(e.target.value),
                                     })
                                 }
                             />
@@ -450,7 +459,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setFacultyForm({
                                         ...facultyForm,
                                         employee_id:
-                                            e.target.value,
+                                            sanitizeId(e.target.value),
                                     })
                                 }
                                 required
@@ -467,7 +476,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setFacultyForm({
                                         ...facultyForm,
                                         first_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                                 required
@@ -483,7 +492,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setFacultyForm({
                                         ...facultyForm,
                                         middle_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                             />
@@ -498,7 +507,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setFacultyForm({
                                         ...facultyForm,
                                         last_name:
-                                            e.target.value,
+                                            sanitizeName(e.target.value),
                                     })
                                 }
                                 required
@@ -579,7 +588,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setFacultyForm({
                                         ...facultyForm,
                                         contact_number:
-                                            e.target.value,
+                                            sanitizePhone(e.target.value),
                                     })
                                 }
                             />

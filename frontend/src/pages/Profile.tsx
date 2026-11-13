@@ -304,7 +304,7 @@ function Profile() {
                             type="text"
                             value={name}
                             onChange={(e) =>
-                                setName(e.target.value)
+                                setName(e.target.value.replace(/[0-9]/g, "").replace(/[^a-zA-Z\sñÑ\-.']/g, ""))
                             }
                             className="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-[#8a6f50] focus:ring-2 focus:ring-[#8a6f50]/20"
                             placeholder="Enter your name"

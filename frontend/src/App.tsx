@@ -74,8 +74,9 @@ function App(): React.JSX.Element {
                 <Suspense fallback={<PageLoadingScreen />}>
                     <Routes>
                         {/* Auth & Entry Routes */}
-                        <Route path="/login" element={<Login />} />
                         <Route path="/" element={<Landing />} />
+                        <Route path="/landing" element={<Landing />} />
+                        <Route path="/login" element={<Login />} />
 
                         {/* Main Application Layout Shell */}
                         <Route element={<MainLayout />}>

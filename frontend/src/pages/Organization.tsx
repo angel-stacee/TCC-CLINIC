@@ -663,7 +663,7 @@ function MemberEditModal({
                                 required
                                 placeholder="e.g. Dr. Maria Elena Ramos, MD"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => setName(e.target.value.replace(/[0-9]/g, "").replace(/[^a-zA-Z\sñÑ\-.',]/g, ""))}
                                 className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs text-stone-800 placeholder-stone-400 focus:border-[#70091f] focus:outline-none focus:ring-2 focus:ring-[#70091f]/20 dark:bg-[#251f19] dark:border-[#382f25] dark:text-stone-100"
                             />
                         </div>
