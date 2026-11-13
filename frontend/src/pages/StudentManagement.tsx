@@ -844,6 +844,38 @@ function StudentManagement() {
 
         setError("");
 
+        if (!studentForm.student_id || !studentForm.student_id.trim()) {
+            setError("Student ID is required.");
+            return;
+        }
+
+        if (!/^\d+$/.test(studentForm.student_id.trim())) {
+            setError("Student ID must contain numbers only.");
+            return;
+        }
+
+        if (!studentForm.first_name || !studentForm.first_name.trim()) {
+            setError("First name is required.");
+            return;
+        }
+
+        if (!studentForm.last_name || !studentForm.last_name.trim()) {
+            setError("Last name is required.");
+            return;
+        }
+
+        if (!studentForm.birth_date || !/^\d{4}-\d{2}-\d{2}$/.test(studentForm.birth_date)) {
+            setError("Birth date is incomplete. Please enter a complete date (Month, Day, and Year).");
+            return;
+        }
+
+        const [bYear] = studentForm.birth_date.split("-").map(Number);
+        const currYear = new Date().getFullYear();
+        if (bYear < 1920 || bYear > currYear) {
+            setError(`Birth year must be between 1920 and ${currYear}.`);
+            return;
+        }
+
         setConfirmation({
             type: editingStudent
                 ? "updateStudent"
@@ -904,6 +936,11 @@ function StudentManagement() {
             return;
         }
 
+        if (staffForm.birth_date && !/^\d{4}-\d{2}-\d{2}$/.test(staffForm.birth_date)) {
+            setError("Staff birth date is incomplete. Please enter the full Month, Day, and Year.");
+            return;
+        }
+
         setConfirmation({
             type: editingStaff
                 ? "updateStaff"
@@ -961,6 +998,11 @@ function StudentManagement() {
 
         if (!facultyForm.position.trim()) {
             setError("Position is required.");
+            return;
+        }
+
+        if (facultyForm.birth_date && !/^\d{4}-\d{2}-\d{2}$/.test(facultyForm.birth_date)) {
+            setError("Faculty birth date is incomplete. Please enter the full Month, Day, and Year.");
             return;
         }
 

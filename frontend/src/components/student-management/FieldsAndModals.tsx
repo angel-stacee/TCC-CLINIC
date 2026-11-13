@@ -1,6 +1,20 @@
 import type { ChangeEventHandler, ReactNode } from "react";
 
-interface InputFieldProps { label: string; value: string | number | null | undefined; onChange: ChangeEventHandler<HTMLInputElement>; type?: string; required?: boolean; placeholder?: string; disabled?: boolean; }
+interface InputFieldProps {
+    label: string;
+    value: string | number | null | undefined;
+    onChange: ChangeEventHandler<HTMLInputElement>;
+    type?: string;
+    required?: boolean;
+    placeholder?: string;
+    disabled?: boolean;
+    min?: string | number;
+    max?: string | number;
+    maxLength?: number;
+    inputMode?: "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url";
+    pattern?: string;
+    error?: string;
+}
 interface SelectFieldProps { label: string; value: string | number | null | undefined; onChange: ChangeEventHandler<HTMLSelectElement>; options: string[]; required?: boolean; disabled?: boolean; }
 interface ModalProps { children: ReactNode; onClose: () => void; title: string; maxWidth?: string; }
 interface ConfirmationModalProps { open: boolean; title: string; message: string; confirmText?: string; cancelText?: string; danger?: boolean; loading?: boolean; onConfirm: () => void; onClose: () => void; }
@@ -15,6 +29,12 @@ export function InputField({
     required = false,
     placeholder = "",
     disabled = false,
+    min,
+    max,
+    maxLength,
+    inputMode,
+    pattern,
+    error,
 }: InputFieldProps) {
     return (
         <div className="flex flex-col gap-1">
@@ -33,8 +53,19 @@ export function InputField({
                 required={required}
                 placeholder={placeholder}
                 disabled={disabled}
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-stone-100"
+                min={min}
+                max={max}
+                maxLength={maxLength}
+                inputMode={inputMode}
+                pattern={pattern}
+                className={`w-full rounded-lg border ${
+                    error ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-stone-300 focus:border-amber-500 focus:ring-amber-100"
+                } bg-white px-3 py-2.5 text-sm outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:bg-stone-100`}
             />
+
+            {error && (
+                <span className="text-xs text-red-500">{error}</span>
+            )}
         </div>
     );
 }

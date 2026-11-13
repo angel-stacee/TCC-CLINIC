@@ -1,4 +1,4 @@
-import type { Dispatch, FormEventHandler, SetStateAction } from "react";
+import { useState, type Dispatch, type FormEventHandler, type SetStateAction } from "react";
 import { Modal, InputField, SelectField } from "./FieldsAndModals";
 
 export interface StudentFormValues { student_id: string; first_name: string; middle_name: string; last_name: string; course: string; year_level: string; section: string; sex: string; birth_date: string; contact_number: string; address: string; }
@@ -9,8 +9,11 @@ const COURSES = ["BSIT", "BSBA", "MidWifery", "BSHM", "BLIS", "BSED", "BSCRIM"];
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SEX_OPTIONS = ["Male", "Female"];
 
-// Disallow special characters for IDs (allows alphanumeric and hyphens e.g. 20241041, FAC-001)
-const sanitizeId = (val: string) => val.replace(/[^a-zA-Z0-9-]/g, "");
+// Student ID: strictly digits (numbers) only, no letters, no special characters!
+const sanitizeStudentId = (val: string) => val.replace(/[^0-9]/g, "").slice(0, 15);
+
+// Staff ID & Faculty Employee ID: alphanumeric and hyphens (e.g. STF-001, FAC-001)
+const sanitizeEmployeeId = (val: string) => val.replace(/[^a-zA-Z0-9-]/g, "").toUpperCase().slice(0, 20);
 
 // Disallow numbers and special characters for names (allows letters, spaces, hyphens, periods, apostrophes, and Philippine letters like ñ/Ñ)
 const sanitizeName = (val: string) => val.replace(/[0-9]/g, "").replace(/[^a-zA-Z\sñÑ\-.']/g, "");
@@ -18,9 +21,85 @@ const sanitizeName = (val: string) => val.replace(/[0-9]/g, "").replace(/[^a-zA-
 // Allow digits only (and optional leading +) for phone numbers
 const sanitizePhone = (val: string) => val.replace(/[^0-9+]/g, "").slice(0, 15);
 
+// Date constraints
+const TODAY = new Date().toISOString().split("T")[0];
+const MIN_BIRTH_DATE = "1920-01-01";
+
+// Helper to validate complete date
+const validateBirthDate = (d: string) => {
+    if (!d || d.trim() === "") return "Birth date is required. Please enter a complete date (Month, Day, and Year).";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return "Birth date is incomplete. Please enter the full Month, Day, and 4-digit Year.";
+    const [y, m, day] = d.split("-").map(Number);
+    const currYear = new Date().getFullYear();
+    if (y < 1920 || y > currYear) return `Birth year must be between 1920 and ${currYear}.`;
+    if (m < 1 || m > 12) return "Invalid month in birth date.";
+    if (day < 1 || day > 31) return "Invalid day in birth date.";
+    const dObj = new Date(d);
+    if (isNaN(dObj.getTime()) || dObj > new Date()) return "Birth date cannot be in the future.";
+    return null;
+};
+
 type StudentFormsProps = { showStudentForm: boolean; editingStudent: boolean; closeStudentForm: () => void; handleStudentSubmit: React.FormEventHandler<HTMLFormElement>; studentForm: StudentFormValues; setStudentForm: React.Dispatch<React.SetStateAction<StudentFormValues>>; saving: boolean; showStaffForm: boolean; editingStaff: boolean; closeStaffForm: () => void; handleStaffSubmit: React.FormEventHandler<HTMLFormElement>; staffForm: StaffFormValues; setStaffForm: React.Dispatch<React.SetStateAction<StaffFormValues>>; showFacultyForm: boolean; editingFaculty: boolean; closeFacultyForm: () => void; handleFacultySubmit: React.FormEventHandler<HTMLFormElement>; facultyForm: FacultyFormValues; setFacultyForm: React.Dispatch<React.SetStateAction<FacultyFormValues>>; };
 
 export function StudentForms({ showStudentForm, editingStudent, closeStudentForm, handleStudentSubmit, studentForm, setStudentForm, saving, showStaffForm, editingStaff, closeStaffForm, handleStaffSubmit, staffForm, setStaffForm, showFacultyForm, editingFaculty, closeFacultyForm, handleFacultySubmit, facultyForm, setFacultyForm }: StudentFormsProps) {
+    const [localError, setLocalError] = useState("");
+
+    const onStudentSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+        e.preventDefault();
+        setLocalError("");
+        if (!studentForm.student_id || studentForm.student_id.trim() === "") {
+            setLocalError("Please enter a valid Student ID (numbers only).");
+            return;
+        }
+        const dateErr = validateBirthDate(studentForm.birth_date);
+        if (dateErr) {
+            setLocalError(dateErr);
+            return;
+        }
+        handleStudentSubmit(e);
+    };
+
+    const onStaffSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+        e.preventDefault();
+        setLocalError("");
+        if (staffForm.birth_date) {
+            const dateErr = validateBirthDate(staffForm.birth_date);
+            if (dateErr) {
+                setLocalError(dateErr);
+                return;
+            }
+        }
+        handleStaffSubmit(e);
+    };
+
+    const onFacultySubmit: FormEventHandler<HTMLFormElement> = (e) => {
+        e.preventDefault();
+        setLocalError("");
+        if (facultyForm.birth_date) {
+            const dateErr = validateBirthDate(facultyForm.birth_date);
+            if (dateErr) {
+                setLocalError(dateErr);
+                return;
+            }
+        }
+        handleFacultySubmit(e);
+    };
+
+    const handleCloseStudent = () => {
+        setLocalError("");
+        closeStudentForm();
+    };
+
+    const handleCloseStaff = () => {
+        setLocalError("");
+        closeStaffForm();
+    };
+
+    const handleCloseFaculty = () => {
+        setLocalError("");
+        closeFacultyForm();
+    };
+
     return (
         <>
 {showStudentForm && (
@@ -30,12 +109,21 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             ? "Edit Student"
                             : "Add New Student"
                     }
-                    onClose={closeStudentForm}
+                    onClose={handleCloseStudent}
                 >
                     <form
-                        onSubmit={handleStudentSubmit}
+                        onSubmit={onStudentSubmit}
                         className="p-6"
                     >
+                        {localError && (
+                            <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+                                <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{localError}</span>
+                            </div>
+                        )}
+
                         <div className="grid gap-4 md:grid-cols-2">
 
                             <InputField
@@ -47,9 +135,12 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStudentForm({
                                         ...studentForm,
                                         student_id:
-                                            sanitizeId(e.target.value),
+                                            sanitizeStudentId(e.target.value),
                                     })
                                 }
+                                inputMode="numeric"
+                                placeholder="e.g. 20241041"
+                                maxLength={15}
                                 required
                             />
 
@@ -163,6 +254,8 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             <InputField
                                 label="Birth Date"
                                 type="date"
+                                min={MIN_BIRTH_DATE}
+                                max={TODAY}
                                 value={
                                     studentForm.birth_date
                                 }
@@ -246,12 +339,21 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             ? "Edit Staff"
                             : "Add New Staff"
                     }
-                    onClose={closeStaffForm}
+                    onClose={handleCloseStaff}
                 >
                     <form
-                        onSubmit={handleStaffSubmit}
+                        onSubmit={onStaffSubmit}
                         className="p-6"
                     >
+                        {localError && (
+                            <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+                                <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{localError}</span>
+                            </div>
+                        )}
+
                         <div className="grid gap-4 md:grid-cols-2">
 
                             <InputField
@@ -263,9 +365,10 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStaffForm({
                                         ...staffForm,
                                         staff_id:
-                                            sanitizeId(e.target.value),
+                                            sanitizeEmployeeId(e.target.value),
                                     })
                                 }
+                                placeholder="e.g. STF-001"
                                 required
                             />
 
@@ -361,6 +464,8 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             <InputField
                                 label="Birth Date"
                                 type="date"
+                                min={MIN_BIRTH_DATE}
+                                max={TODAY}
                                 value={
                                     staffForm.birth_date
                                 }
@@ -441,12 +546,21 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             ? "Edit Faculty"
                             : "Add New Faculty"
                     }
-                    onClose={closeFacultyForm}
+                    onClose={handleCloseFaculty}
                 >
                     <form
-                        onSubmit={handleFacultySubmit}
+                        onSubmit={onFacultySubmit}
                         className="p-6"
                     >
+                        {localError && (
+                            <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+                                <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{localError}</span>
+                            </div>
+                        )}
+
                         <div className="grid gap-4 md:grid-cols-2">
 
 
@@ -459,7 +573,7 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setFacultyForm({
                                         ...facultyForm,
                                         employee_id:
-                                            sanitizeId(e.target.value),
+                                            sanitizeEmployeeId(e.target.value),
                                     })
                                 }
                                 required
@@ -566,6 +680,8 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             <InputField
                                 label="Birth Date"
                                 type="date"
+                                min={MIN_BIRTH_DATE}
+                                max={TODAY}
                                 value={
                                     facultyForm.birth_date
                                 }
