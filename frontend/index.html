@@ -19,7 +19,84 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        .tcc-boot-screen {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #f7f2eb;
+          font-family: system-ui, -apple-system, sans-serif;
+          color: #3d3329;
+          margin: 0;
+          padding: 24px;
+          box-sizing: border-box;
+        }
+        .tcc-boot-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .tcc-boot-logo {
+          width: 72px;
+          height: 72px;
+          border-radius: 16px;
+          object-fit: cover;
+          margin-bottom: 16px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+          animation: tcc-pulse 1.8s infinite ease-in-out;
+        }
+        .tcc-boot-title {
+          font-size: 18px;
+          font-weight: 700;
+          margin: 0 0 6px 0;
+          color: #3d3329;
+        }
+        .tcc-boot-sub {
+          font-size: 13px;
+          color: #887d70;
+          margin: 0 0 20px 0;
+        }
+        .tcc-boot-bar {
+          width: 180px;
+          height: 5px;
+          background: #e8dfd4;
+          border-radius: 999px;
+          overflow: hidden;
+          position: relative;
+        }
+        .tcc-boot-bar::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 50%;
+          background: #8a6f50;
+          border-radius: 999px;
+          animation: tcc-shim 1.4s infinite ease-in-out;
+        }
+        @keyframes tcc-shim {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(250%); }
+        }
+        @keyframes tcc-pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 0.9; }
+        }
+      </style>
+      <div class="tcc-boot-screen">
+        <div class="tcc-boot-card">
+          <img src="/tcc-logo.jpg" alt="TCC Logo" class="tcc-boot-logo" />
+          <h1 class="tcc-boot-title">Tagoloan Community College</h1>
+          <p class="tcc-boot-sub">Clinic Management System</p>
+          <div class="tcc-boot-bar"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

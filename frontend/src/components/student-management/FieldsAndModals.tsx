@@ -4,6 +4,8 @@ interface InputFieldProps {
     label: string;
     value: string | number | null | undefined;
     onChange: ChangeEventHandler<HTMLInputElement>;
+    onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+    onPaste?: React.ClipboardEventHandler<HTMLInputElement>;
     type?: string;
     required?: boolean;
     placeholder?: string;
@@ -25,6 +27,8 @@ export function InputField({
     label,
     value,
     onChange,
+    onKeyDown,
+    onPaste,
     type = "text",
     required = false,
     placeholder = "",
@@ -50,6 +54,8 @@ export function InputField({
                 type={type}
                 value={value ?? ""}
                 onChange={onChange}
+                onKeyDown={onKeyDown}
+                onPaste={onPaste}
                 required={required}
                 placeholder={placeholder}
                 disabled={disabled}
@@ -66,6 +72,147 @@ export function InputField({
             {error && (
                 <span className="text-xs text-red-500">{error}</span>
             )}
+        </div>
+    );
+}
+
+const MONTH_NAMES = [
+    { value: "01", label: "01 - Jan" },
+    { value: "02", label: "02 - Feb" },
+    { value: "03", label: "03 - Mar" },
+    { value: "04", label: "04 - Apr" },
+    { value: "05", label: "05 - May" },
+    { value: "06", label: "06 - Jun" },
+    { value: "07", label: "07 - Jul" },
+    { value: "08", label: "08 - Aug" },
+    { value: "09", label: "09 - Sep" },
+    { value: "10", label: "10 - Oct" },
+    { value: "11", label: "11 - Nov" },
+    { value: "12", label: "12 - Dec" },
+];
+
+export function DateOfBirthField({
+    label = "Birth Date",
+    value,
+    onChange,
+    required = false,
+    error,
+}: {
+    label?: string;
+    value: string;
+    onChange: (dateStr: string) => void;
+    required?: boolean;
+    error?: string;
+}) {
+    const rawParts = (value || "").split("-");
+    const selectedYear = rawParts[0] && /^\d{4}$/.test(rawParts[0]) ? rawParts[0] : "";
+    const selectedMonth = rawParts[1] && /^\d{2}$/.test(rawParts[1]) ? rawParts[1] : "";
+    const selectedDay = rawParts[2] && /^\d{2}$/.test(rawParts[2]) ? rawParts[2] : "";
+
+    const currentYear = new Date().getFullYear();
+    const years: number[] = [];
+    for (let y = currentYear; y >= 1930; y--) {
+        years.push(y);
+    }
+
+    const maxDays = (() => {
+        if (!selectedMonth) return 31;
+        const m = parseInt(selectedMonth, 10);
+        if (m === 2) {
+            const y = parseInt(selectedYear, 10);
+            if (!y) return 29;
+            return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28;
+        }
+        return [4, 6, 9, 11].includes(m) ? 30 : 31;
+    })();
+
+    const handlePartChange = (part: "year" | "month" | "day", val: string) => {
+        const y = part === "year" ? val : selectedYear;
+        const m = part === "month" ? val : selectedMonth;
+        let d = part === "day" ? val : selectedDay;
+
+        // Auto-correct day if month changes and day exceeds maxDays
+        if (d && m) {
+            const monthNum = parseInt(m, 10);
+            let limit = 31;
+            if (monthNum === 2) {
+                const yearNum = parseInt(y, 10);
+                limit = yearNum && ((yearNum % 4 === 0 && yearNum % 100 !== 0) || yearNum % 400 === 0) ? 29 : 28;
+            } else if ([4, 6, 9, 11].includes(monthNum)) {
+                limit = 30;
+            }
+            if (parseInt(d, 10) > limit) {
+                d = String(limit).padStart(2, "0");
+            }
+        }
+
+        if (y && m && d) {
+            onChange(`${y}-${m}-${d}`);
+        } else if (y || m || d) {
+            onChange(`${y || ""}-${m || ""}-${d || ""}`);
+        } else {
+            onChange("");
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-stone-700">
+                {label}
+                {required && <span className="ml-1 text-red-500">*</span>}
+            </label>
+
+            <div className="grid grid-cols-3 gap-2">
+                <select
+                    value={selectedMonth}
+                    onChange={(e) => handlePartChange("month", e.target.value)}
+                    required={required}
+                    className={`w-full rounded-lg border ${
+                        error ? "border-red-400 focus:border-red-500" : "border-stone-300 focus:border-amber-500"
+                    } bg-white px-2 py-2.5 text-xs sm:text-sm outline-none transition focus:ring-2 focus:ring-amber-100`}
+                >
+                    <option value="">Month</option>
+                    {MONTH_NAMES.map((m) => (
+                        <option key={m.value} value={m.value}>
+                            {m.label}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    value={selectedDay}
+                    onChange={(e) => handlePartChange("day", e.target.value)}
+                    required={required}
+                    className={`w-full rounded-lg border ${
+                        error ? "border-red-400 focus:border-red-500" : "border-stone-300 focus:border-amber-500"
+                    } bg-white px-2 py-2.5 text-xs sm:text-sm outline-none transition focus:ring-2 focus:ring-amber-100`}
+                >
+                    <option value="">Day</option>
+                    {Array.from({ length: maxDays }, (_, i) => String(i + 1).padStart(2, "0")).map((d) => (
+                        <option key={d} value={d}>
+                            {d}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    value={selectedYear}
+                    onChange={(e) => handlePartChange("year", e.target.value)}
+                    required={required}
+                    className={`w-full rounded-lg border ${
+                        error ? "border-red-400 focus:border-red-500" : "border-stone-300 focus:border-amber-500"
+                    } bg-white px-2 py-2.5 text-xs sm:text-sm outline-none transition focus:ring-2 focus:ring-amber-100`}
+                >
+                    <option value="">Year</option>
+                    {years.map((y) => (
+                        <option key={y} value={String(y)}>
+                            {y}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            {error && <span className="text-xs text-red-500">{error}</span>}
         </div>
     );
 }

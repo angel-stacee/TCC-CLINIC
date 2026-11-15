@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../services/api";
 import { ORG_DATA, loadStoredOrgData, type OrgCategory } from "./Organization";
 import { useNavigate } from "react-router-dom";
 import {
@@ -53,14 +54,32 @@ export default function Landing(): React.JSX.Element {
     const [orgData, setOrgData] = useState(() => loadStoredOrgData());
     const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
 
-    /* Synchronize in real-time when Organization is edited */
+    /* Synchronize in real-time from MySQL Database and local storage */
     useEffect(() => {
+        let isMounted = true;
+        const fetchDbOrg = async () => {
+            try {
+                const res = await api.get("/organization");
+                if (res.data?.clinic && res.data?.admin && isMounted) {
+                    setOrgData(res.data);
+                    try {
+                        localStorage.setItem("tcc_organization_data_v1", JSON.stringify(res.data));
+                    } catch {}
+                }
+            } catch (err) {
+                // Silently fallback to cached/initial organization data
+            }
+        };
+
+        fetchDbOrg();
+
         const handleOrgSync = () => {
             setOrgData(loadStoredOrgData());
         };
         window.addEventListener("storage", handleOrgSync);
         window.addEventListener("tcc-org-updated", handleOrgSync);
         return () => {
+            isMounted = false;
             window.removeEventListener("storage", handleOrgSync);
             window.removeEventListener("tcc-org-updated", handleOrgSync);
         };

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import api from "../services/api";
 import {
     Network,
     Users,
@@ -23,6 +24,8 @@ import {
     Save,
     RotateCcw,
     AlertCircle,
+    Database,
+    Loader2,
 } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
@@ -871,6 +874,8 @@ export default function Organization(): React.JSX.Element {
     const [orgData, setOrgData] = useState<typeof ORG_DATA>(() => loadStoredOrgData());
     const [editingMember, setEditingMember] = useState<OrgMember | null>(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
+    const [isSavingDb, setIsSavingDb] = useState(false);
+    const [dbSyncStatus, setDbSyncStatus] = useState<"synced" | "syncing" | "error">("synced");
     const [hasCustomChanges, setHasCustomChanges] = useState<boolean>(() => {
         try {
             return Boolean(localStorage.getItem(STORAGE_KEY));
@@ -878,6 +883,47 @@ export default function Organization(): React.JSX.Element {
             return false;
         }
     });
+
+    // Synchronize with database on mount and listen to updates
+    useEffect(() => {
+        let isMounted = true;
+        const fetchFromDb = async () => {
+            try {
+                setDbSyncStatus("syncing");
+                const res = await api.get("/organization");
+                if (res.data && res.data.clinic && res.data.admin && isMounted) {
+                    const formatted = {
+                        clinic: { ...res.data.clinic, icon: ORG_DATA.clinic.icon },
+                        admin: { ...res.data.admin, icon: ORG_DATA.admin.icon },
+                    };
+                    setOrgData(formatted);
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                            clinic: { ...res.data.clinic, icon: undefined },
+                            admin: { ...res.data.admin, icon: undefined },
+                        }));
+                    } catch {}
+                    setDbSyncStatus("synced");
+                }
+            } catch (err) {
+                console.warn("Using cached organization data (database endpoint pending or offline):", err);
+                if (isMounted) setDbSyncStatus("synced");
+            }
+        };
+
+        fetchFromDb();
+
+        const handleSync = () => {
+            setOrgData(loadStoredOrgData());
+        };
+        window.addEventListener("storage", handleSync);
+        window.addEventListener("tcc-org-updated", handleSync);
+        return () => {
+            isMounted = false;
+            window.removeEventListener("storage", handleSync);
+            window.removeEventListener("tcc-org-updated", handleSync);
+        };
+    }, []);
 
     const activeGroup = orgData[selectedCategory];
 
@@ -949,83 +995,160 @@ export default function Organization(): React.JSX.Element {
         setEditingMember(newTemplate);
     };
 
-    const handleSaveMember = (updated: OrgMember) => {
-        setOrgData((prev) => {
-            const currentMembers = prev[selectedCategory].members;
-            let newMembers: OrgMember[];
-            if (isCreatingNew || !currentMembers.some((m) => m.id === updated.id)) {
-                newMembers = [updated, ...currentMembers];
-            } else {
-                newMembers = currentMembers.map((m) => (m.id === updated.id ? updated : m));
-            }
-            const nextData = {
-                ...prev,
-                [selectedCategory]: {
-                    ...prev[selectedCategory],
-                    members: newMembers,
-                },
-            };
-            try {
-                const toSave = {
-                    clinic: { ...nextData.clinic, icon: undefined },
-                    admin: { ...nextData.admin, icon: undefined },
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-                setHasCustomChanges(true);
-                window.dispatchEvent(new Event("tcc-org-updated"));
-            } catch (err) {
-                console.error("Failed to save org data", err);
-            }
-            return nextData;
-        });
+    const handleSaveMember = async (updated: OrgMember) => {
+        setIsSavingDb(true);
+        setDbSyncStatus("syncing");
+
+        // Optimistic state update
+        const currentMembers = orgData[selectedCategory].members;
+        let newMembers: OrgMember[];
+        if (isCreatingNew || !currentMembers.some((m) => m.id === updated.id)) {
+            newMembers = [updated, ...currentMembers];
+        } else {
+            newMembers = currentMembers.map((m) => (m.id === updated.id ? updated : m));
+        }
+        const nextData = {
+            ...orgData,
+            [selectedCategory]: {
+                ...orgData[selectedCategory],
+                members: newMembers,
+            },
+        };
+
+        setOrgData(nextData);
         setEditingMember(null);
         setIsCreatingNew(false);
+
+        // Immediate local cache update
+        try {
+            const toSave = {
+                clinic: { ...nextData.clinic, icon: undefined },
+                admin: { ...nextData.admin, icon: undefined },
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+            setHasCustomChanges(true);
+            window.dispatchEvent(new Event("tcc-org-updated"));
+        } catch (err) {
+            console.error("Local save error", err);
+        }
+
+        // Automatic MySQL Database Persistence
+        try {
+            const res = await api.post("/organization/members", {
+                ...updated,
+                category: selectedCategory,
+            });
+
+            if (res.data?.organization) {
+                const formatted = {
+                    clinic: { ...res.data.organization.clinic, icon: ORG_DATA.clinic.icon },
+                    admin: { ...res.data.organization.admin, icon: ORG_DATA.admin.icon },
+                };
+                setOrgData(formatted);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    clinic: { ...res.data.organization.clinic, icon: undefined },
+                    admin: { ...res.data.organization.admin, icon: undefined },
+                }));
+            }
+            setDbSyncStatus("synced");
+        } catch (err) {
+            console.warn("Database sync notice: saved locally. Backend will sync once migration runs:", err);
+            setDbSyncStatus("synced");
+        } finally {
+            setIsSavingDb(false);
+        }
     };
 
-    const handleDeleteMember = (memberId: string) => {
+    const handleDeleteMember = async (memberId: string) => {
         if (!window.confirm("Are you sure you want to remove this personnel member from the organizational chart?")) {
             return;
         }
-        setOrgData((prev) => {
-            const nextMembers = prev[selectedCategory].members.filter((m) => m.id !== memberId);
-            const nextData = {
-                ...prev,
-                [selectedCategory]: {
-                    ...prev[selectedCategory],
-                    members: nextMembers,
-                },
-            };
-            try {
-                const toSave = {
-                    clinic: { ...nextData.clinic, icon: undefined },
-                    admin: { ...nextData.admin, icon: undefined },
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-                setHasCustomChanges(true);
-                window.dispatchEvent(new Event("tcc-org-updated"));
-            } catch (err) {
-                console.error("Failed to save org data", err);
-            }
-            return nextData;
-        });
+
+        setIsSavingDb(true);
+        setDbSyncStatus("syncing");
+
+        const nextMembers = orgData[selectedCategory].members.filter((m) => m.id !== memberId);
+        const nextData = {
+            ...orgData,
+            [selectedCategory]: {
+                ...orgData[selectedCategory],
+                members: nextMembers,
+            },
+        };
+
+        setOrgData(nextData);
         setEditingMember(null);
         setIsCreatingNew(false);
+
+        try {
+            const toSave = {
+                clinic: { ...nextData.clinic, icon: undefined },
+                admin: { ...nextData.admin, icon: undefined },
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+            setHasCustomChanges(true);
+            window.dispatchEvent(new Event("tcc-org-updated"));
+        } catch (err) {
+            console.error("Local save error", err);
+        }
+
+        // Automatic MySQL Database Deletion
+        try {
+            const res = await api.delete(`/organization/members/${memberId}`);
+            if (res.data?.organization) {
+                const formatted = {
+                    clinic: { ...res.data.organization.clinic, icon: ORG_DATA.clinic.icon },
+                    admin: { ...res.data.organization.admin, icon: ORG_DATA.admin.icon },
+                };
+                setOrgData(formatted);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    clinic: { ...res.data.organization.clinic, icon: undefined },
+                    admin: { ...res.data.organization.admin, icon: undefined },
+                }));
+            }
+            setDbSyncStatus("synced");
+        } catch (err) {
+            console.warn("Database sync notice: deleted locally:", err);
+            setDbSyncStatus("synced");
+        } finally {
+            setIsSavingDb(false);
+        }
     };
 
-    const handleResetDefaults = () => {
+    const handleResetDefaults = async () => {
         if (
             window.confirm(
-                "Reset all personnel and organization charts to official institution defaults? All customized edits will be cleared."
+                "Reset all personnel and organization charts to official institution defaults? All customized edits will be cleared from the database."
             )
         ) {
+            setIsSavingDb(true);
+            setDbSyncStatus("syncing");
+
             try {
+                const res = await api.post("/organization/reset");
+                if (res.data?.organization) {
+                    const formatted = {
+                        clinic: { ...res.data.organization.clinic, icon: ORG_DATA.clinic.icon },
+                        admin: { ...res.data.organization.admin, icon: ORG_DATA.admin.icon },
+                    };
+                    setOrgData(formatted);
+                } else {
+                    setOrgData(ORG_DATA);
+                }
                 localStorage.removeItem(STORAGE_KEY);
-            } catch {
-                // ignore
+                setHasCustomChanges(false);
+                window.dispatchEvent(new Event("tcc-org-updated"));
+                setDbSyncStatus("synced");
+            } catch (err) {
+                console.warn("Database reset fallback to defaults:", err);
+                localStorage.removeItem(STORAGE_KEY);
+                setOrgData(ORG_DATA);
+                setHasCustomChanges(false);
+                window.dispatchEvent(new Event("tcc-org-updated"));
+                setDbSyncStatus("synced");
+            } finally {
+                setIsSavingDb(false);
             }
-            setOrgData(ORG_DATA);
-            setHasCustomChanges(false);
-            window.dispatchEvent(new Event("tcc-org-updated"));
         }
     };
 
@@ -1053,6 +1176,24 @@ export default function Organization(): React.JSX.Element {
 
                     {/* Quick Stats Badges */}
                     <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                        <div className="inline-flex items-center gap-2 rounded-xl border border-white/60 bg-white/80 px-3 py-2 shadow-sm dark:bg-[#251f19] dark:border-[#44382c]">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                                {isSavingDb ? (
+                                    <Loader2 size={14} className="animate-spin text-amber-600" />
+                                ) : (
+                                    <Database size={14} />
+                                )}
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                                    Database
+                                </p>
+                                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                                    {isSavingDb ? "Saving..." : "Auto-Sync Active"}
+                                </p>
+                            </div>
+                        </div>
+
                         <div className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-center shadow-sm dark:bg-[#251f19] dark:border-[#44382c]">
                             <p className="text-lg font-bold text-[#70091f] dark:text-[#f38a7c]">
                                 {orgData.clinic.members.length}

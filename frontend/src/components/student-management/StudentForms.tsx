@@ -1,5 +1,5 @@
 import { useState, type Dispatch, type FormEventHandler, type SetStateAction } from "react";
-import { Modal, InputField, SelectField } from "./FieldsAndModals";
+import { Modal, InputField, SelectField, DateOfBirthField } from "./FieldsAndModals";
 
 export interface StudentFormValues { student_id: string; first_name: string; middle_name: string; last_name: string; course: string; year_level: string; section: string; sex: string; birth_date: string; contact_number: string; address: string; }
 export interface StaffFormValues { staff_id: string; first_name: string; middle_name: string; last_name: string; position: string; department: string; sex: string; birth_date: string; contact_number: string; address: string; }
@@ -27,8 +27,10 @@ const MIN_BIRTH_DATE = "1920-01-01";
 
 // Helper to validate complete date
 const validateBirthDate = (d: string) => {
-    if (!d || d.trim() === "") return "Birth date is required. Please enter a complete date (Month, Day, and Year).";
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return "Birth date is incomplete. Please enter the full Month, Day, and 4-digit Year.";
+    if (!d || d.trim() === "" || d.includes("--") || d.startsWith("-") || d.endsWith("-")) {
+        return "Birth date is required. Please select a complete Month, Day, and Year.";
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return "Birth date is incomplete. Please select the full Month, Day, and 4-digit Year.";
     const [y, m, day] = d.split("-").map(Number);
     const currYear = new Date().getFullYear();
     if (y < 1920 || y > currYear) return `Birth year must be between 1920 and ${currYear}.`;
@@ -138,6 +140,18 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeStudentId(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+                                    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return;
+                                    if (!/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
+                                    setStudentForm({ ...studentForm, student_id: text });
+                                }}
                                 inputMode="numeric"
                                 placeholder="e.g. 20241041"
                                 maxLength={15}
@@ -156,6 +170,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 required
                             />
 
@@ -171,6 +190,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
 
                             <InputField
@@ -185,6 +209,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 required
                             />
 
@@ -251,19 +280,13 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                 required
                             />
 
-                            <InputField
+                            <DateOfBirthField
                                 label="Birth Date"
-                                type="date"
-                                min={MIN_BIRTH_DATE}
-                                max={TODAY}
-                                value={
-                                    studentForm.birth_date
-                                }
-                                onChange={(e) =>
+                                value={studentForm.birth_date}
+                                onChange={(val) =>
                                     setStudentForm({
                                         ...studentForm,
-                                        birth_date:
-                                            e.target.value,
+                                        birth_date: val,
                                     })
                                 }
                                 required
@@ -384,6 +407,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 required
                             />
 
@@ -399,6 +427,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
 
                             <InputField
@@ -413,6 +446,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 required
                             />
 
@@ -461,19 +499,13 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                 options={SEX_OPTIONS}
                             />
 
-                            <InputField
+                            <DateOfBirthField
                                 label="Birth Date"
-                                type="date"
-                                min={MIN_BIRTH_DATE}
-                                max={TODAY}
-                                value={
-                                    staffForm.birth_date
-                                }
-                                onChange={(e) =>
+                                value={staffForm.birth_date}
+                                onChange={(val) =>
                                     setStaffForm({
                                         ...staffForm,
-                                        birth_date:
-                                            e.target.value,
+                                        birth_date: val,
                                     })
                                 }
                             />
@@ -593,6 +625,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 required
                             />
 
@@ -609,6 +646,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
 
 
@@ -624,6 +666,11 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                             sanitizeName(e.target.value),
                                     })
                                 }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 required
                             />
 
@@ -677,19 +724,13 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             />
 
 
-                            <InputField
+                            <DateOfBirthField
                                 label="Birth Date"
-                                type="date"
-                                min={MIN_BIRTH_DATE}
-                                max={TODAY}
-                                value={
-                                    facultyForm.birth_date
-                                }
-                                onChange={(e) =>
+                                value={facultyForm.birth_date}
+                                onChange={(val) =>
                                     setFacultyForm({
                                         ...facultyForm,
-                                        birth_date:
-                                            e.target.value,
+                                        birth_date: val,
                                     })
                                 }
                             />
