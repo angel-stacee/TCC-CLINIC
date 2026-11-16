@@ -1412,18 +1412,7 @@ function StudentManagement() {
                         </p>
                     </div>
 
-                    <div className="relative inline-flex items-center rounded-xl bg-[#8a6f50] shadow-sm" ref={addPatientDropdownRef}>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setError("");
-                                setShowAddPatientDropdown(false);
-                                openStudentForm();
-                            }}
-                            className="inline-flex items-center gap-2 rounded-l-xl px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
-                        >
-                            <span>+ Add Patient</span>
-                        </button>
+                    <div className="relative" ref={addPatientDropdownRef}>
                         <button
                             type="button"
                             onClick={() => {
@@ -1432,9 +1421,9 @@ function StudentManagement() {
                             }}
                             aria-expanded={showAddPatientDropdown}
                             aria-haspopup="true"
-                            aria-label="Select patient category"
-                            className="inline-flex items-center justify-center rounded-r-xl border-l border-[#9c8163] px-3 py-3 text-white transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#8a6f50] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
                         >
+                            <span>+ Add Patient</span>
                             <ChevronDown
                                 size={16}
                                 aria-hidden="true"
