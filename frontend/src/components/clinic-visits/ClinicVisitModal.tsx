@@ -1,6 +1,106 @@
-import type { FormEventHandler } from "react";
+import { useState, type FormEventHandler } from "react";
 import { Pill, Search, X } from "lucide-react";
 import type { VisitRecord } from "./ClinicVisitTable";
+
+const TEMPERATURE_OPTIONS = [
+    { value: "36.0 °C", label: "36.0 °C" },
+    { value: "36.2 °C", label: "36.2 °C" },
+    { value: "36.4 °C", label: "36.4 °C" },
+    { value: "36.5 °C", label: "36.5 °C (Normal)" },
+    { value: "36.6 °C", label: "36.6 °C" },
+    { value: "36.7 °C", label: "36.7 °C" },
+    { value: "36.8 °C", label: "36.8 °C" },
+    { value: "36.9 °C", label: "36.9 °C" },
+    { value: "37.0 °C", label: "37.0 °C" },
+    { value: "37.1 °C", label: "37.1 °C" },
+    { value: "37.2 °C", label: "37.2 °C" },
+    { value: "37.3 °C", label: "37.3 °C" },
+    { value: "37.4 °C", label: "37.4 °C" },
+    { value: "37.5 °C", label: "37.5 °C (Low Grade Fever)" },
+    { value: "37.6 °C", label: "37.6 °C" },
+    { value: "37.7 °C", label: "37.7 °C" },
+    { value: "37.8 °C", label: "37.8 °C" },
+    { value: "37.9 °C", label: "37.9 °C" },
+    { value: "38.0 °C", label: "38.0 °C (Fever)" },
+    { value: "38.2 °C", label: "38.2 °C" },
+    { value: "38.5 °C", label: "38.5 °C" },
+    { value: "39.0 °C", label: "39.0 °C" },
+];
+
+const BLOOD_PRESSURE_OPTIONS = [
+    { value: "120/80", label: "120/80 (Normal)" },
+    { value: "110/70", label: "110/70" },
+    { value: "110/80", label: "110/80" },
+    { value: "120/70", label: "120/70" },
+    { value: "120/75", label: "120/75" },
+    { value: "120/85", label: "120/85" },
+    { value: "130/80", label: "130/80 (Pre-hypertension)" },
+    { value: "130/85", label: "130/85" },
+    { value: "130/90", label: "130/90" },
+    { value: "140/90", label: "140/90 (Hypertension Stage 1)" },
+    { value: "140/95", label: "140/95" },
+    { value: "150/90", label: "150/90" },
+    { value: "150/100", label: "150/100 (Hypertension Stage 2)" },
+    { value: "100/70", label: "100/70" },
+    { value: "100/60", label: "100/60" },
+    { value: "90/60", label: "90/60 (Low BP / Hypotension)" },
+];
+
+const SYMPTOMS_OPTIONS = [
+    "Fever / Chills",
+    "Headache / Migraine",
+    "Stomachache / Abdominal Pain",
+    "Cough and Colds",
+    "Dizziness / Lightheadedness",
+    "Nausea / Vomiting",
+    "Dysmenorrhea (Menstrual Cramps)",
+    "Sore Throat / Tonsillitis",
+    "Open Wound / Laceration / Abrasion",
+    "Sprain / Muscle Strain / Body Pain",
+    "Toothache / Dental Pain",
+    "Asthma / Difficulty Breathing",
+    "Hyperventilation / Panic",
+    "Eye Irritation / Redness",
+    "Allergic Reaction / Skin Rash",
+    "Fatigue / General Weakness",
+    "Nosebleed (Epistaxis)",
+    "Diarrhea / Loose Stool",
+    "Chest Discomfort",
+    "Fainting / Syncope",
+];
+
+const ASSESSMENT_OPTIONS = [
+    "Normal Vital Signs / Mild Condition",
+    "Febrile State / Suspected Viral Infection",
+    "Acute Upper Respiratory Tract Infection (URTI)",
+    "Acute Gastroenteritis / Indigestion",
+    "Tension / Stress Headache",
+    "Dysmenorrhea",
+    "Minor Trauma / Abrasion / Wound",
+    "Musculoskeletal Strain / Sprain",
+    "Bronchial Asthma in Exacerbation",
+    "Vasovagal Syncope / Fainting Episode",
+    "Elevated Blood Pressure (Hypertension)",
+    "Mild Allergic Reaction",
+    "Dental Pain / Caries",
+    "Hyperventilation Syndrome / Anxiety",
+    "Under Observation in Clinic",
+    "Referred to Hospital / Attending Physician",
+];
+
+const REMARKS_OPTIONS = [
+    "Rested in clinic and returned to class",
+    "Excused and sent home",
+    "Medication administered; advised to rest",
+    "First aid applied; advised to monitor",
+    "Cold / warm compress applied",
+    "Hydrated and vital signs stabilized",
+    "Referred to hospital / emergency room",
+    "Referred to private physician",
+    "Parent / Guardian notified",
+    "Advised to follow up tomorrow",
+    "Patient refused medication / treatment",
+];
 
 interface PatientOption {
     id: string | number;
@@ -77,6 +177,8 @@ export function ClinicVisitModal({
     getMedicineTreatment,
     selectedMedicine,
 }: ClinicVisitModalProps) {
+    const [customFields, setCustomFields] = useState<Record<string, boolean>>({});
+
     if (!showForm) return null;
 
     return (
@@ -297,14 +399,48 @@ export function ClinicVisitModal({
                             <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
                                 Temperature
                             </label>
-                            <input
-                                type="text"
-                                name="temperature"
-                                value={formData.temperature}
-                                onChange={handleChange}
-                                placeholder="e.g. 36.5 °C"
+                            <select
+                                value={
+                                    customFields.temperature
+                                        ? "__custom__"
+                                        : TEMPERATURE_OPTIONS.some((o) => o.value === formData.temperature)
+                                        ? formData.temperature
+                                        : formData.temperature
+                                        ? "__custom__"
+                                        : ""
+                                }
+                                onChange={(event) => {
+                                    const val = event.target.value;
+                                    if (val === "__custom__") {
+                                        setCustomFields((prev) => ({ ...prev, temperature: true }));
+                                        setFormData((prev: any) => ({ ...prev, temperature: "" }));
+                                    } else {
+                                        setCustomFields((prev) => ({ ...prev, temperature: false }));
+                                        setFormData((prev: any) => ({ ...prev, temperature: val }));
+                                    }
+                                }}
                                 className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
-                            />
+                            >
+                                <option value="">Select Temperature</option>
+                                {TEMPERATURE_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                                <option value="__custom__">Other (Type custom)</option>
+                            </select>
+                            {(customFields.temperature ||
+                                (!TEMPERATURE_OPTIONS.some((o) => o.value === formData.temperature) &&
+                                    formData.temperature)) && (
+                                <input
+                                    type="text"
+                                    name="temperature"
+                                    value={formData.temperature}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 36.5 °C"
+                                    className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                                />
+                            )}
                         </div>
 
                         {/* 6. Blood Pressure (Right) */}
@@ -312,14 +448,48 @@ export function ClinicVisitModal({
                             <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
                                 Blood Pressure
                             </label>
-                            <input
-                                type="text"
-                                name="blood_pressure"
-                                value={formData.blood_pressure}
-                                onChange={handleChange}
-                                placeholder="e.g. 120/80"
+                            <select
+                                value={
+                                    customFields.blood_pressure
+                                        ? "__custom__"
+                                        : BLOOD_PRESSURE_OPTIONS.some((o) => o.value === formData.blood_pressure)
+                                        ? formData.blood_pressure
+                                        : formData.blood_pressure
+                                        ? "__custom__"
+                                        : ""
+                                }
+                                onChange={(event) => {
+                                    const val = event.target.value;
+                                    if (val === "__custom__") {
+                                        setCustomFields((prev) => ({ ...prev, blood_pressure: true }));
+                                        setFormData((prev: any) => ({ ...prev, blood_pressure: "" }));
+                                    } else {
+                                        setCustomFields((prev) => ({ ...prev, blood_pressure: false }));
+                                        setFormData((prev: any) => ({ ...prev, blood_pressure: val }));
+                                    }
+                                }}
                                 className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
-                            />
+                            >
+                                <option value="">Select Blood Pressure</option>
+                                {BLOOD_PRESSURE_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                                <option value="__custom__">Other (Type custom)</option>
+                            </select>
+                            {(customFields.blood_pressure ||
+                                (!BLOOD_PRESSURE_OPTIONS.some((o) => o.value === formData.blood_pressure) &&
+                                    formData.blood_pressure)) && (
+                                <input
+                                    type="text"
+                                    name="blood_pressure"
+                                    value={formData.blood_pressure}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 120/80"
+                                    className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                                />
+                            )}
                         </div>
 
                         {/* 7. Symptoms (Left) */}
@@ -327,14 +497,47 @@ export function ClinicVisitModal({
                             <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
                                 Symptoms
                             </label>
-                            <textarea
-                                name="symptoms"
-                                value={formData.symptoms}
-                                onChange={handleChange}
-                                rows={2}
-                                placeholder="Describe the symptoms..."
-                                className="w-full resize-none rounded-lg border border-stone-300 bg-white p-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
-                            />
+                            <select
+                                value={
+                                    customFields.symptoms
+                                        ? "__custom__"
+                                        : SYMPTOMS_OPTIONS.includes(formData.symptoms)
+                                        ? formData.symptoms
+                                        : formData.symptoms
+                                        ? "__custom__"
+                                        : ""
+                                }
+                                onChange={(event) => {
+                                    const val = event.target.value;
+                                    if (val === "__custom__") {
+                                        setCustomFields((prev) => ({ ...prev, symptoms: true }));
+                                        setFormData((prev: any) => ({ ...prev, symptoms: "" }));
+                                    } else {
+                                        setCustomFields((prev) => ({ ...prev, symptoms: false }));
+                                        setFormData((prev: any) => ({ ...prev, symptoms: val }));
+                                    }
+                                }}
+                                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                            >
+                                <option value="">Select Symptoms</option>
+                                {SYMPTOMS_OPTIONS.map((opt) => (
+                                    <option key={opt} value={opt}>
+                                        {opt}
+                                    </option>
+                                ))}
+                                <option value="__custom__">Other (Type custom)</option>
+                            </select>
+                            {(customFields.symptoms ||
+                                (!SYMPTOMS_OPTIONS.includes(formData.symptoms) && formData.symptoms)) && (
+                                <input
+                                    type="text"
+                                    name="symptoms"
+                                    value={formData.symptoms}
+                                    onChange={handleChange}
+                                    placeholder="Describe custom symptoms..."
+                                    className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                                />
+                            )}
                         </div>
 
                         {/* 8. Assessment (Right) */}
@@ -342,14 +545,47 @@ export function ClinicVisitModal({
                             <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
                                 Assessment
                             </label>
-                            <textarea
-                                name="assessment"
-                                value={formData.assessment}
-                                onChange={handleChange}
-                                rows={2}
-                                placeholder="Clinic assessment..."
-                                className="w-full resize-none rounded-lg border border-stone-300 bg-white p-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
-                            />
+                            <select
+                                value={
+                                    customFields.assessment
+                                        ? "__custom__"
+                                        : ASSESSMENT_OPTIONS.includes(formData.assessment)
+                                        ? formData.assessment
+                                        : formData.assessment
+                                        ? "__custom__"
+                                        : ""
+                                }
+                                onChange={(event) => {
+                                    const val = event.target.value;
+                                    if (val === "__custom__") {
+                                        setCustomFields((prev) => ({ ...prev, assessment: true }));
+                                        setFormData((prev: any) => ({ ...prev, assessment: "" }));
+                                    } else {
+                                        setCustomFields((prev) => ({ ...prev, assessment: false }));
+                                        setFormData((prev: any) => ({ ...prev, assessment: val }));
+                                    }
+                                }}
+                                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                            >
+                                <option value="">Select Assessment</option>
+                                {ASSESSMENT_OPTIONS.map((opt) => (
+                                    <option key={opt} value={opt}>
+                                        {opt}
+                                    </option>
+                                ))}
+                                <option value="__custom__">Other (Type custom)</option>
+                            </select>
+                            {(customFields.assessment ||
+                                (!ASSESSMENT_OPTIONS.includes(formData.assessment) && formData.assessment)) && (
+                                <input
+                                    type="text"
+                                    name="assessment"
+                                    value={formData.assessment}
+                                    onChange={handleChange}
+                                    placeholder="Describe custom assessment..."
+                                    className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                                />
+                            )}
                         </div>
 
                         {/* 9. Treatment (Left) */}
@@ -379,10 +615,8 @@ export function ClinicVisitModal({
                                 <label className="flex items-center gap-1.5 text-sm font-medium text-stone-700 dark:text-stone-300">
                                     <Pill size={15} />
                                     Medicine / Supply
-                                    {treatmentNeedsMedicine(formData.treatment) ? (
+                                    {treatmentNeedsMedicine(formData.treatment) && (
                                         <span className="text-red-500">*</span>
-                                    ) : (
-                                        <span className="text-stone-400 font-normal text-xs">(Optional)</span>
                                     )}
                                 </label>
 
@@ -404,81 +638,49 @@ export function ClinicVisitModal({
                                 )}
                             </div>
 
-                            <div className="relative">
-                                <Search
-                                    size={16}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-                                />
-
-                                <input
-                                    type="text"
-                                    value={medicineSearch}
-                                    onChange={(event) => {
-                                        setMedicineSearch(event.target.value);
+                            <select
+                                value={formData.medicine_id ? String(formData.medicine_id) : ""}
+                                onChange={(event) => {
+                                    const val = event.target.value;
+                                    if (!val) {
                                         setFormData((previous: any) => ({
                                             ...previous,
                                             medicine_id: "",
                                             medicine_quantity: "",
                                         }));
-                                        setShowMedicineDropdown(true);
-                                    }}
-                                    onFocus={() => setShowMedicineDropdown(true)}
-                                    placeholder="Search medicine or supply..."
-                                    className="w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
-                                />
-                            </div>
+                                        setMedicineSearch("");
+                                    } else {
+                                        const medicine = filteredMedicines.find(
+                                            (m: any) => String(m.id) === String(val)
+                                        );
+                                        if (medicine) {
+                                            selectMedicine(medicine);
+                                        }
+                                    }
+                                }}
+                                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                            >
+                                <option value="">Select Medicine / Supply</option>
+                                {filteredMedicines.map((medicine: any) => {
+                                    const name = getMedicineName(medicine);
+                                    const unit = getMedicineUnit(medicine);
+                                    const stock = getMedicineStock(medicine);
+                                    const outOfStock = stock <= 0;
+                                    const isCurrentlySelected =
+                                        String(formData.medicine_id) === String(medicine.id);
+                                    const disableMedicine = outOfStock && !isCurrentlySelected;
 
-                            {showMedicineDropdown && (
-                                <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-stone-200 bg-white shadow-xl dark:border-stone-700 dark:bg-stone-800">
-                                    {filteredMedicines.length === 0 ? (
-                                        <div className="px-4 py-5 text-center text-xs text-stone-500">
-                                            No medicine found.
-                                        </div>
-                                    ) : (
-                                        filteredMedicines.map((medicine) => {
-                                            const name = getMedicineName(medicine);
-                                            const unit = getMedicineUnit(medicine);
-                                            const stock = getMedicineStock(medicine);
-                                            const treatment = getMedicineTreatment(medicine);
-                                            const outOfStock = stock <= 0;
-                                            const isCurrentlySelected = String(formData.medicine_id) === String(medicine.id);
-                                            const disableMedicine = outOfStock && !isCurrentlySelected;
-
-                                            return (
-                                                <button
-                                                    key={medicine.id}
-                                                    type="button"
-                                                    disabled={disableMedicine}
-                                                    onClick={() => selectMedicine(medicine)}
-                                                    className="w-full border-b border-stone-100 px-4 py-2.5 text-left transition last:border-b-0 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-700/60 dark:hover:bg-stone-700/50"
-                                                >
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <div className="min-w-0">
-                                                            <p className="text-xs font-bold text-stone-800 dark:text-stone-200">
-                                                                {name}
-                                                            </p>
-                                                            <p className="mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
-                                                                Unit: {unit} · Treatment: {treatment}
-                                                            </p>
-                                                        </div>
-                                                        <span
-                                                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                                                stock > 10
-                                                                    ? "bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400"
-                                                                    : stock > 0
-                                                                      ? "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
-                                                                      : "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400"
-                                                            }`}
-                                                        >
-                                                            {stock > 0 ? `${stock} left` : "Out of stock"}
-                                                        </span>
-                                                    </div>
-                                                </button>
-                                            );
-                                        })
-                                    )}
-                                </div>
-                            )}
+                                    return (
+                                        <option
+                                            key={medicine.id}
+                                            value={medicine.id}
+                                            disabled={disableMedicine}
+                                        >
+                                            {name} {stock > 0 ? `(${stock} ${unit} left)` : "(Out of stock)"}
+                                        </option>
+                                    );
+                                })}
+                            </select>
 
                             {selectedMedicine && (
                                 <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50/50 p-2.5 dark:border-amber-900/40 dark:bg-amber-950/20">
@@ -488,7 +690,8 @@ export function ClinicVisitModal({
                                                 {getMedicineName(selectedMedicine)}
                                             </p>
                                             <p className="text-[10px] text-stone-500 dark:text-stone-400">
-                                                Available: {getMedicineStock(selectedMedicine)} {getMedicineUnit(selectedMedicine)}
+                                                Available: {getMedicineStock(selectedMedicine)}{" "}
+                                                {getMedicineUnit(selectedMedicine)}
                                             </p>
                                         </div>
                                     </div>
@@ -519,14 +722,47 @@ export function ClinicVisitModal({
                             <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
                                 Remarks
                             </label>
-                            <textarea
-                                name="remarks"
-                                value={formData.remarks}
-                                onChange={handleChange}
-                                rows={2}
-                                placeholder="Additional remarks..."
-                                className="w-full resize-none rounded-lg border border-stone-300 bg-white p-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
-                            />
+                            <select
+                                value={
+                                    customFields.remarks
+                                        ? "__custom__"
+                                        : REMARKS_OPTIONS.includes(formData.remarks)
+                                        ? formData.remarks
+                                        : formData.remarks
+                                        ? "__custom__"
+                                        : ""
+                                }
+                                onChange={(event) => {
+                                    const val = event.target.value;
+                                    if (val === "__custom__") {
+                                        setCustomFields((prev) => ({ ...prev, remarks: true }));
+                                        setFormData((prev: any) => ({ ...prev, remarks: "" }));
+                                    } else {
+                                        setCustomFields((prev) => ({ ...prev, remarks: false }));
+                                        setFormData((prev: any) => ({ ...prev, remarks: val }));
+                                    }
+                                }}
+                                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                            >
+                                <option value="">Select Remarks</option>
+                                {REMARKS_OPTIONS.map((opt) => (
+                                    <option key={opt} value={opt}>
+                                        {opt}
+                                    </option>
+                                ))}
+                                <option value="__custom__">Other (Type custom)</option>
+                            </select>
+                            {(customFields.remarks ||
+                                (!REMARKS_OPTIONS.includes(formData.remarks) && formData.remarks)) && (
+                                <input
+                                    type="text"
+                                    name="remarks"
+                                    value={formData.remarks}
+                                    onChange={handleChange}
+                                    placeholder="Additional remarks..."
+                                    className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                                />
+                            )}
                         </div>
                     </div>
 
