@@ -2520,6 +2520,25 @@ function StudentManagement() {
                     loading={saving}
                     onClose={() => {
                         if (!saving) {
+                            const isAddOrUpdate = [
+                                "addStudent",
+                                "addStaff",
+                                "addFaculty",
+                                "updateStudent",
+                                "updateStaff",
+                                "updateFaculty",
+                            ].includes(confirmation.type);
+
+                            if (isAddOrUpdate) {
+                                setShowStudentForm(false);
+                                setShowStaffForm(false);
+                                setShowFacultyForm(false);
+                                setEditingStudent(null);
+                                setEditingStaff(null);
+                                setEditingFaculty(null);
+                                resetAllPatientForms();
+                            }
+
                             setConfirmation(null);
                         }
                     }}
