@@ -13,10 +13,12 @@ import {
     X,
 } from "lucide-react";
 import api from "../../services/api";
+import { addClinicNotification } from "../../services/notifications";
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a6f50]/40";
 
 const AI_QUICK_REPLIES = [
+    "Add a new patient",
     "How many clinic visits were recorded this month?",
     "How many medicines are low or out of stock?",
     "How do I record a clinic visit?",
@@ -248,7 +250,7 @@ export function DashboardAssistant() {
                     (message) =>
                         message.role === "user" || message.role === "assistant"
                 )
-                .slice(-12)
+                .slice(-30)
                 .map((message) => ({
                     role:
                         message.role === "assistant"
@@ -275,6 +277,29 @@ export function DashboardAssistant() {
                     timestamp: Date.now(),
                 },
             ]);
+
+            if (response.data?.patient_created) {
+                const pc = response.data.patient_created;
+                const catLabel =
+                    pc.type === "faculty"
+                        ? "Faculty"
+                        : pc.type === "staff"
+                        ? "Staff"
+                        : "Student";
+
+                addClinicNotification({
+                    type: "add",
+                    title: `${catLabel} Registered via Chatbot`,
+                    description: `${pc.name || "Patient"} (${pc.id || "ID"}) recorded`,
+                    category: "patient",
+                });
+
+                window.dispatchEvent(
+                    new CustomEvent("clinic-patient-updated", {
+                        detail: pc,
+                    })
+                );
+            }
         } catch (error) {
             console.error("AI chatbot error:", error);
 
