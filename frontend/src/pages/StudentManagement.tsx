@@ -2520,22 +2520,14 @@ function StudentManagement() {
                     loading={saving}
                     onClose={() => {
                         if (!saving) {
-                            const isAddOrUpdate = [
+                            const isAdd = [
                                 "addStudent",
                                 "addStaff",
                                 "addFaculty",
-                                "updateStudent",
-                                "updateStaff",
-                                "updateFaculty",
                             ].includes(confirmation.type);
 
-                            if (isAddOrUpdate) {
-                                setShowStudentForm(false);
-                                setShowStaffForm(false);
-                                setShowFacultyForm(false);
-                                setEditingStudent(null);
-                                setEditingStaff(null);
-                                setEditingFaculty(null);
+                            if (isAdd) {
+                                // Remove only the input text; do not add patient; keep form open
                                 resetAllPatientForms();
                             }
 

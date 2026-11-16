@@ -321,6 +321,79 @@ export function StudentForms({
         });
     };
 
+    const isStudentFormEmpty = () => {
+        return (
+            !studentForm.student_id &&
+            !studentForm.first_name &&
+            !studentForm.middle_name &&
+            !studentForm.last_name &&
+            !studentForm.course &&
+            !studentForm.year_level &&
+            !studentForm.section &&
+            !studentForm.sex &&
+            !studentForm.birth_date &&
+            !studentForm.contact_number &&
+            !studentForm.address
+        );
+    };
+
+    const isStaffFormEmpty = () => {
+        return (
+            !staffForm.staff_id &&
+            !staffForm.first_name &&
+            !staffForm.middle_name &&
+            !staffForm.last_name &&
+            !staffForm.position &&
+            !staffForm.department &&
+            !staffForm.sex &&
+            !staffForm.birth_date &&
+            !staffForm.contact_number &&
+            !staffForm.address
+        );
+    };
+
+    const isFacultyFormEmpty = () => {
+        return (
+            !facultyForm.employee_id &&
+            !facultyForm.first_name &&
+            !facultyForm.middle_name &&
+            !facultyForm.last_name &&
+            !facultyForm.position &&
+            !facultyForm.department &&
+            !facultyForm.sex &&
+            !facultyForm.birth_date &&
+            !facultyForm.contact_number &&
+            !facultyForm.address
+        );
+    };
+
+    const handleCancelStudent = () => {
+        setLocalError("");
+        if (isStudentFormEmpty() || editingStudent) {
+            closeStudentForm();
+        } else {
+            resetForms();
+        }
+    };
+
+    const handleCancelStaff = () => {
+        setLocalError("");
+        if (isStaffFormEmpty() || editingStaff) {
+            closeStaffForm();
+        } else {
+            resetForms();
+        }
+    };
+
+    const handleCancelFaculty = () => {
+        setLocalError("");
+        if (isFacultyFormEmpty() || editingFaculty) {
+            closeFacultyForm();
+        } else {
+            resetForms();
+        }
+    };
+
     const handleCloseStudent = () => {
         resetForms();
         closeStudentForm();
@@ -573,7 +646,7 @@ export function StudentForms({
                         <div className="mt-6 flex justify-end gap-3 border-t pt-5">
                             <button
                                 type="button"
-                                onClick={handleCloseStudent}
+                                onClick={handleCancelStudent}
                                 disabled={saving}
                                 className="rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
                             >
@@ -810,7 +883,7 @@ export function StudentForms({
                         <div className="mt-6 flex justify-end gap-3 border-t pt-5">
                             <button
                                 type="button"
-                                onClick={handleCloseStaff}
+                                onClick={handleCancelStaff}
                                 disabled={saving}
                                 className="rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
                             >
@@ -1052,7 +1125,7 @@ export function StudentForms({
                         <div className="mt-6 flex justify-end gap-3 border-t pt-5">
                             <button
                                 type="button"
-                                onClick={handleCloseFaculty}
+                                onClick={handleCancelFaculty}
                                 disabled={saving}
                                 className="rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
                             >
