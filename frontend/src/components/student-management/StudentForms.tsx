@@ -8,6 +8,18 @@ export interface FacultyFormValues { employee_id: string; first_name: string; mi
 
 const COURSES = ["BSIT", "BSBA", "MidWifery", "BSHM", "BLIS", "BSED", "BSCRIM"];
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+const SECTIONS = [
+    "Section A",
+    "Section B",
+    "Section C",
+    "Section D",
+    "Section E",
+    "Section F",
+    "1A", "1B", "1C", "1D",
+    "2A", "2B", "2C", "2D",
+    "3A", "3B", "3C", "3D",
+    "4A", "4B", "4C", "4D",
+];
 const SEX_OPTIONS = ["Male", "Female"];
 
 const FACULTY_POSITIONS = [
@@ -432,19 +444,16 @@ export function StudentForms({
                                 required
                             />
 
-                            <InputField
+                            <SelectField
                                 label="Section"
-                                value={
-                                    studentForm.section
-                                }
+                                value={studentForm.section}
                                 onChange={(e) =>
                                     setStudentForm({
                                         ...studentForm,
-                                        section:
-                                            e.target.value,
+                                        section: e.target.value,
                                     })
                                 }
-                                placeholder="Example: BSIT-3B"
+                                options={SECTIONS}
                             />
 
                             <SelectField
