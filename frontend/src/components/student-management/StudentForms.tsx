@@ -88,8 +88,8 @@ const allowOnlyDigitsBeforeInput = (e: React.FormEvent<HTMLInputElement> & { dat
 // Disallow numbers and special characters for names (allows letters, spaces, hyphens, periods, apostrophes, and Philippine letters like ñ/Ñ)
 const sanitizeName = (val: string) => val.replace(/[0-9]/g, "").replace(/[^a-zA-Z\sñÑ\-.']/g, "");
 
-// Allow digits only (and optional leading +) for phone numbers
-const sanitizePhone = (val: string) => val.replace(/[^0-9+]/g, "").slice(0, 15);
+// Contact numbers: strictly digits (numbers) only, maximum of 11 numbers (e.g. 09123456789)
+const sanitizePhone = (val: string) => val.replace(/[^0-9]/g, "").slice(0, 11);
 
 // Date constraints
 const TODAY = new Date().toISOString().split("T")[0];
@@ -487,6 +487,18 @@ export function StudentForms({
                                             sanitizePhone(e.target.value),
                                     })
                                 }
+                                onKeyDown={allowOnlyDigitsKeyDown}
+                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 11);
+                                    setStudentForm({ ...studentForm, contact_number: text });
+                                }}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="e.g. 09123456789"
+                                maxLength={11}
                                 required
                             />
 
@@ -716,6 +728,18 @@ export function StudentForms({
                                             sanitizePhone(e.target.value),
                                     })
                                 }
+                                onKeyDown={allowOnlyDigitsKeyDown}
+                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 11);
+                                    setStaffForm({ ...staffForm, contact_number: text });
+                                }}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="e.g. 09123456789"
+                                maxLength={11}
                             />
 
                             <div className="md:col-span-2">
@@ -947,6 +971,18 @@ export function StudentForms({
                                             sanitizePhone(e.target.value),
                                     })
                                 }
+                                onKeyDown={allowOnlyDigitsKeyDown}
+                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 11);
+                                    setFacultyForm({ ...facultyForm, contact_number: text });
+                                }}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="e.g. 09123456789"
+                                maxLength={11}
                             />
 
 
