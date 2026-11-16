@@ -302,7 +302,7 @@ export function StudentForms({
                     title={
                         editingStudent
                             ? "Edit Student"
-                            : "Add New Student"
+                            : "Add New Patient"
                     }
                     onClose={handleCloseStudent}
                 >
@@ -548,7 +548,7 @@ export function StudentForms({
                             >
                                 {editingStudent
                                     ? "Update Student"
-                                    : "Save Student"}
+                                    : "Save Patient"}
                             </button>
                         </div>
                     </form>
@@ -564,7 +564,7 @@ export function StudentForms({
                     title={
                         editingStaff
                             ? "Edit Staff"
-                            : "Add New Staff"
+                            : "Add New Patient"
                     }
                     onClose={handleCloseStaff}
                 >
@@ -787,7 +787,7 @@ export function StudentForms({
                             >
                                 {editingStaff
                                     ? "Update Staff"
-                                    : "Save Staff"}
+                                    : "Save Patient"}
                             </button>
                         </div>
                     </form>
@@ -803,7 +803,7 @@ export function StudentForms({
                     title={
                         editingFaculty
                             ? "Edit Faculty"
-                            : "Add New Faculty"
+                            : "Add New Patient"
                     }
                     onClose={handleCloseFaculty}
                 >
@@ -1031,7 +1031,7 @@ export function StudentForms({
                             >
                                 {editingFaculty
                                     ? "Update Faculty"
-                                    : "Save Faculty"}
+                                    : "Save Patient"}
                             </button>
                         </div>
                     </form>
