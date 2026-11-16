@@ -147,8 +147,6 @@ function StudentManagement() {
 
 
 
-    const [showAddPatientDropdown, setShowAddPatientDropdown] = useState(false);
-    const addPatientDropdownRef = useRef<HTMLDivElement>(null);
     const [showStudentForm, setShowStudentForm] = useState(false);
     const [showStaffForm, setShowStaffForm] = useState(false);
     const [showFacultyForm, setShowFacultyForm] = useState(false);
@@ -376,32 +374,6 @@ function StudentManagement() {
         return () => clearTimeout(timeout);
     }, [search, loadStudentPage, loadStaffPage, loadFacultyPage]);
 
-    useEffect(() => {
-        if (!showAddPatientDropdown) return;
-
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                addPatientDropdownRef.current &&
-                !addPatientDropdownRef.current.contains(event.target as Node)
-            ) {
-                setShowAddPatientDropdown(false);
-            }
-        };
-
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                setShowAddPatientDropdown(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleKeyDown);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [showAddPatientDropdown]);
-
     async function fetchData() {
         setLoading(true);
         setError("");
@@ -522,7 +494,6 @@ function StudentManagement() {
             });
         }
 
-        setShowAddPatientDropdown(false);
         setShowStudentForm(true);
     };
 
@@ -571,7 +542,6 @@ function StudentManagement() {
             });
         }
 
-        setShowAddPatientDropdown(false);
         setShowStaffForm(true);
     };
 
@@ -629,7 +599,6 @@ function StudentManagement() {
             });
         }
 
-        setShowAddPatientDropdown(false);
         setShowFacultyForm(true);
     };
 
@@ -1412,87 +1381,16 @@ function StudentManagement() {
                         </p>
                     </div>
 
-                    <div className="relative" ref={addPatientDropdownRef}>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setError("");
-                                setShowAddPatientDropdown((prev) => !prev);
-                            }}
-                            aria-expanded={showAddPatientDropdown}
-                            aria-haspopup="true"
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#8a6f50] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
-                        >
-                            <span>+ Add Patient</span>
-                            <ChevronDown
-                                size={16}
-                                aria-hidden="true"
-                                className={`transition-transform duration-200 ${showAddPatientDropdown ? "rotate-180" : ""}`}
-                            />
-                        </button>
-
-                        {showAddPatientDropdown && (
-                            <div
-                                role="menu"
-                                aria-orientation="vertical"
-                                className="absolute right-0 top-full z-30 mt-2 w-72 divide-y divide-[#eee7de] rounded-xl border border-[#e8dfd4] bg-white p-1.5 shadow-xl dark:divide-[#382f25] dark:border-[#4e4234] dark:bg-[#211c17]"
-                            >
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    onClick={() => {
-                                        setShowAddPatientDropdown(false);
-                                        openStudentForm();
-                                    }}
-                                    className="flex w-full items-start gap-3 rounded-lg p-3 text-left transition hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
-                                >
-                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f3ebdf] text-[#8a6f50] dark:bg-[#382f25] dark:text-[#d3bca2]">
-                                        <GraduationCap size={22} strokeWidth={1.8} aria-hidden="true" />
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-[#3d3329] dark:text-[#f8f3eb]">Student</div>
-                                        <div className="mt-0.5 text-xs text-[#887d70] dark:text-[#a99d8f]">Add a new student record.</div>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    onClick={() => {
-                                        setShowAddPatientDropdown(false);
-                                        openStaffForm();
-                                    }}
-                                    className="flex w-full items-start gap-3 rounded-lg p-3 text-left transition hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
-                                >
-                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f3ebdf] text-[#8a6f50] dark:bg-[#382f25] dark:text-[#d3bca2]">
-                                        <Briefcase size={20} strokeWidth={1.8} aria-hidden="true" />
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-[#3d3329] dark:text-[#f8f3eb]">Staff</div>
-                                        <div className="mt-0.5 text-xs text-[#887d70] dark:text-[#a99d8f]">Add a new staff record.</div>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    onClick={() => {
-                                        setShowAddPatientDropdown(false);
-                                        openFacultyForm();
-                                    }}
-                                    className="flex w-full items-start gap-3 rounded-lg p-3 text-left transition hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
-                                >
-                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f3ebdf] text-[#8a6f50] dark:bg-[#382f25] dark:text-[#d3bca2]">
-                                        <BookOpen size={20} strokeWidth={1.8} aria-hidden="true" />
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-[#3d3329] dark:text-[#f8f3eb]">Faculty</div>
-                                        <div className="mt-0.5 text-xs text-[#887d70] dark:text-[#a99d8f]">Add a new faculty record.</div>
-                                    </div>
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setError("");
+                            openStudentForm();
+                        }}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#8a6f50] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
+                    >
+                        <span>+ Add Patient</span>
+                    </button>
                 </div>
 
 
