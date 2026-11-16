@@ -467,6 +467,13 @@ function StudentManagement() {
 
 
 
+    const resetAllPatientForms = () => {
+        setStudentForm({ ...EMPTY_STUDENT_FORM });
+        setStaffForm({ ...EMPTY_STAFF_FORM });
+        setFacultyForm({ ...EMPTY_FACULTY_FORM });
+        setError("");
+    };
+
     const openStudentForm = (student = null) => {
         setError("");
         setEditingStudent(student);
@@ -489,9 +496,7 @@ function StudentManagement() {
                 address: student.address || "",
             });
         } else {
-            setStudentForm({
-                ...EMPTY_STUDENT_FORM,
-            });
+            resetAllPatientForms();
         }
 
         setShowStudentForm(true);
@@ -504,17 +509,8 @@ function StudentManagement() {
 
         setShowStudentForm(false);
         setEditingStudent(null);
-
-        setStudentForm({
-            ...EMPTY_STUDENT_FORM,
-        });
+        resetAllPatientForms();
     };
-
-
-
-
-
-
 
     const openStaffForm = (person = null) => {
         setError("");
@@ -537,9 +533,7 @@ function StudentManagement() {
                 address: person.address || "",
             });
         } else {
-            setStaffForm({
-                ...EMPTY_STAFF_FORM,
-            });
+            resetAllPatientForms();
         }
 
         setShowStaffForm(true);
@@ -552,17 +546,8 @@ function StudentManagement() {
 
         setShowStaffForm(false);
         setEditingStaff(null);
-
-        setStaffForm({
-            ...EMPTY_STAFF_FORM,
-        });
+        resetAllPatientForms();
     };
-
-
-
-
-
-
 
     const openFacultyForm = (faculty = null) => {
         setError("");
@@ -594,9 +579,7 @@ function StudentManagement() {
                     faculty.address || "",
             });
         } else {
-            setFacultyForm({
-                ...EMPTY_FACULTY_FORM,
-            });
+            resetAllPatientForms();
         }
 
         setShowFacultyForm(true);
@@ -609,10 +592,7 @@ function StudentManagement() {
 
         setShowFacultyForm(false);
         setEditingFaculty(null);
-
-        setFacultyForm({
-            ...EMPTY_FACULTY_FORM,
-        });
+        resetAllPatientForms();
     };
 
     const handleSwitchCategory = (category: "student" | "faculty" | "staff") => {

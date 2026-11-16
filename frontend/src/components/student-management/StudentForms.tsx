@@ -280,18 +280,59 @@ export function StudentForms({
         handleFacultySubmit(e);
     };
 
-    const handleCloseStudent = () => {
+    const resetForms = () => {
         setLocalError("");
+        setStudentForm({
+            student_id: "",
+            first_name: "",
+            middle_name: "",
+            last_name: "",
+            course: "",
+            year_level: "",
+            section: "",
+            sex: "",
+            birth_date: "",
+            contact_number: "",
+            address: "",
+        });
+        setStaffForm({
+            staff_id: "",
+            first_name: "",
+            middle_name: "",
+            last_name: "",
+            position: "",
+            department: "",
+            sex: "",
+            birth_date: "",
+            contact_number: "",
+            address: "",
+        });
+        setFacultyForm({
+            employee_id: "",
+            first_name: "",
+            middle_name: "",
+            last_name: "",
+            position: "",
+            department: "",
+            sex: "",
+            birth_date: "",
+            contact_number: "",
+            address: "",
+        });
+    };
+
+    const handleCloseStudent = () => {
+        resetForms();
         closeStudentForm();
     };
 
     const handleCloseStaff = () => {
-        setLocalError("");
+        resetForms();
         closeStaffForm();
     };
 
     const handleCloseFaculty = () => {
-        setLocalError("");
+        resetForms();
         closeFacultyForm();
     };
 
@@ -532,9 +573,7 @@ export function StudentForms({
                         <div className="mt-6 flex justify-end gap-3 border-t pt-5">
                             <button
                                 type="button"
-                                onClick={
-                                    closeStudentForm
-                                }
+                                onClick={handleCloseStudent}
                                 disabled={saving}
                                 className="rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
                             >
@@ -771,9 +810,7 @@ export function StudentForms({
                         <div className="mt-6 flex justify-end gap-3 border-t pt-5">
                             <button
                                 type="button"
-                                onClick={
-                                    closeStaffForm
-                                }
+                                onClick={handleCloseStaff}
                                 disabled={saving}
                                 className="rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
                             >
@@ -1015,9 +1052,7 @@ export function StudentForms({
                         <div className="mt-6 flex justify-end gap-3 border-t pt-5">
                             <button
                                 type="button"
-                                onClick={
-                                    closeFacultyForm
-                                }
+                                onClick={handleCloseFaculty}
                                 disabled={saving}
                                 className="rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
                             >
