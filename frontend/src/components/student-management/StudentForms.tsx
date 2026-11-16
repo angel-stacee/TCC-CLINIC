@@ -10,6 +10,58 @@ const COURSES = ["BSIT", "BSBA", "MidWifery", "BSHM", "BLIS", "BSED", "BSCRIM"];
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SEX_OPTIONS = ["Male", "Female"];
 
+const FACULTY_POSITIONS = [
+    "Instructor I",
+    "Instructor II",
+    "Instructor III",
+    "Assistant Professor",
+    "Associate Professor",
+    "Professor",
+    "Program Chair / Head",
+    "College Dean",
+    "Visiting Lecturer",
+    "Part-Time Lecturer",
+    "Faculty Member",
+];
+
+const STAFF_POSITIONS = [
+    "Administrative Assistant",
+    "Administrative Aide",
+    "Office Clerk / Staff",
+    "Guidance Counselor",
+    "Clinic Nurse / Staff",
+    "Security Officer / Guard",
+    "Maintenance / Utility Staff",
+    "IT / Technical Support Specialist",
+    "Accounting Staff / Cashier",
+    "Registrar Staff",
+    "College Librarian / Library Staff",
+    "Laboratory Custodian",
+    "Staff Member",
+];
+
+const DEPARTMENTS = [
+    "College of Information Technology (BSIT)",
+    "College of Business Administration (BSBA)",
+    "College of Hospitality Management (BSHM)",
+    "College of Education (BSED)",
+    "College of Criminal Justice Education (BSCRIM)",
+    "College of Nursing & Midwifery",
+    "Department of Library and Information Science (BLIS)",
+    "Department of General Education",
+    "Office of the College President",
+    "Office of the College Registrar",
+    "Health Services & Campus Clinic",
+    "Office of Student Affairs & Services (OSAS)",
+    "Guidance & Counseling Center",
+    "Finance & Accounting Office",
+    "Human Resource Management Office (HRMO)",
+    "Management Information Systems (MIS / IT)",
+    "College Library",
+    "General Services & Maintenance",
+    "Security & Safety Unit",
+];
+
 // All patient IDs (Student ID, Staff ID, Faculty Employee ID): strictly digits (numbers) only, no letters, no special characters!
 const sanitizeNumericId = (val: string) => val.replace(/[^0-9]/g, "").slice(0, 15);
 
@@ -601,34 +653,29 @@ export function StudentForms({
                                 required
                             />
 
-                            <InputField
+                            <SelectField
                                 label="Position"
-                                value={
-                                    staffForm.position
-                                }
+                                value={staffForm.position}
                                 onChange={(e) =>
                                     setStaffForm({
                                         ...staffForm,
-                                        position:
-                                            e.target.value,
+                                        position: e.target.value,
                                     })
                                 }
-                                placeholder="Example: Clinic Staff"
+                                options={STAFF_POSITIONS}
                                 required
                             />
 
-                            <InputField
+                            <SelectField
                                 label="Department"
-                                value={
-                                    staffForm.department
-                                }
+                                value={staffForm.department}
                                 onChange={(e) =>
                                     setStaffForm({
                                         ...staffForm,
-                                        department:
-                                            e.target.value,
+                                        department: e.target.value,
                                     })
                                 }
+                                options={DEPARTMENTS}
                             />
 
                             <SelectField
@@ -834,36 +881,29 @@ export function StudentForms({
                             />
 
 
-                            <InputField
+                            <SelectField
                                 label="Position"
-                                value={
-                                    facultyForm.position
-                                }
+                                value={facultyForm.position}
                                 onChange={(e) =>
                                     setFacultyForm({
                                         ...facultyForm,
-                                        position:
-                                            e.target.value,
+                                        position: e.target.value,
                                     })
                                 }
-                                placeholder="Example: Instructor"
+                                options={FACULTY_POSITIONS}
                                 required
                             />
 
-
-                            <InputField
+                            <SelectField
                                 label="Department"
-                                value={
-                                    facultyForm.department
-                                }
+                                value={facultyForm.department}
                                 onChange={(e) =>
                                     setFacultyForm({
                                         ...facultyForm,
-                                        department:
-                                            e.target.value,
+                                        department: e.target.value,
                                     })
                                 }
-                                placeholder="Example: College of Information Technology"
+                                options={DEPARTMENTS}
                             />
 
 

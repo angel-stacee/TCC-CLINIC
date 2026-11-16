@@ -257,6 +257,11 @@ export function SelectField({
     required = false,
     disabled = false,
 }: SelectFieldProps) {
+    const stringVal = value !== null && value !== undefined && value !== "" ? String(value) : "";
+    const allOptions = (stringVal && !options.includes(stringVal))
+        ? [stringVal, ...options]
+        : options;
+
     return (
         <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-stone-700">
@@ -268,7 +273,7 @@ export function SelectField({
             </label>
 
             <select
-                value={value ?? ""}
+                value={stringVal}
                 onChange={onChange}
                 required={required}
                 disabled={disabled}
@@ -278,7 +283,7 @@ export function SelectField({
                     Select {label}
                 </option>
 
-                {options.map((option) => (
+                {allOptions.map((option) => (
                     <option key={option} value={option}>
                         {option}
                     </option>
