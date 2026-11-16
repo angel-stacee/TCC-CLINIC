@@ -5,6 +5,7 @@ interface InputFieldProps {
     value: string | number | null | undefined;
     onChange: ChangeEventHandler<HTMLInputElement>;
     onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+    onBeforeInput?: React.FormEventHandler<HTMLInputElement>;
     onPaste?: React.ClipboardEventHandler<HTMLInputElement>;
     type?: string;
     required?: boolean;
@@ -28,6 +29,7 @@ export function InputField({
     value,
     onChange,
     onKeyDown,
+    onBeforeInput,
     onPaste,
     type = "text",
     required = false,
@@ -55,6 +57,7 @@ export function InputField({
                 value={value ?? ""}
                 onChange={onChange}
                 onKeyDown={onKeyDown}
+                onBeforeInput={onBeforeInput}
                 onPaste={onPaste}
                 required={required}
                 placeholder={placeholder}
@@ -77,18 +80,18 @@ export function InputField({
 }
 
 const MONTH_NAMES = [
-    { value: "01", label: "01 - Jan" },
-    { value: "02", label: "02 - Feb" },
-    { value: "03", label: "03 - Mar" },
-    { value: "04", label: "04 - Apr" },
-    { value: "05", label: "05 - May" },
-    { value: "06", label: "06 - Jun" },
-    { value: "07", label: "07 - Jul" },
-    { value: "08", label: "08 - Aug" },
-    { value: "09", label: "09 - Sep" },
-    { value: "10", label: "10 - Oct" },
-    { value: "11", label: "11 - Nov" },
-    { value: "12", label: "12 - Dec" },
+    { value: "01", label: "January" },
+    { value: "02", label: "February" },
+    { value: "03", label: "March" },
+    { value: "04", label: "April" },
+    { value: "05", label: "May" },
+    { value: "06", label: "June" },
+    { value: "07", label: "July" },
+    { value: "08", label: "August" },
+    { value: "09", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
 ];
 
 export function DateOfBirthField({
@@ -104,10 +107,33 @@ export function DateOfBirthField({
     required?: boolean;
     error?: string;
 }) {
-    const rawParts = (value || "").split("-");
-    const selectedYear = rawParts[0] && /^\d{4}$/.test(rawParts[0]) ? rawParts[0] : "";
-    const selectedMonth = rawParts[1] && /^\d{2}$/.test(rawParts[1]) ? rawParts[1] : "";
-    const selectedDay = rawParts[2] && /^\d{2}$/.test(rawParts[2]) ? rawParts[2] : "";
+    const normalized = (value || "").replace(/\//g, "-");
+    const rawParts = normalized.split("-");
+
+    let selectedYear = "";
+    let selectedMonth = "";
+    let selectedDay = "";
+
+    if (rawParts.length >= 3) {
+        if (/^\d{4}$/.test(rawParts[0])) {
+            // YYYY-MM-DD
+            selectedYear = rawParts[0];
+            selectedMonth = /^\d{1,2}$/.test(rawParts[1]) ? rawParts[1].padStart(2, "0") : "";
+            selectedDay = /^\d{1,2}$/.test(rawParts[2]) ? rawParts[2].padStart(2, "0") : "";
+        } else if (/^\d{4}$/.test(rawParts[2])) {
+            // MM-DD-YYYY
+            selectedYear = rawParts[2];
+            selectedMonth = /^\d{1,2}$/.test(rawParts[0]) ? rawParts[0].padStart(2, "0") : "";
+            selectedDay = /^\d{1,2}$/.test(rawParts[1]) ? rawParts[1].padStart(2, "0") : "";
+        } else {
+            selectedYear = /^\d{4}$/.test(rawParts[0]) ? rawParts[0] : "";
+            selectedMonth = /^\d{1,2}$/.test(rawParts[1]) ? rawParts[1].padStart(2, "0") : "";
+            selectedDay = /^\d{1,2}$/.test(rawParts[2]) ? rawParts[2].padStart(2, "0") : "";
+        }
+    } else if (rawParts.length === 2 && /^\d{4}$/.test(rawParts[0])) {
+        selectedYear = rawParts[0];
+        selectedMonth = /^\d{1,2}$/.test(rawParts[1]) ? rawParts[1].padStart(2, "0") : "";
+    }
 
     const currentYear = new Date().getFullYear();
     const years: number[] = [];

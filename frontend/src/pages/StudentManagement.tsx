@@ -974,6 +974,11 @@ function StudentManagement() {
             return;
         }
 
+        if (!/^\d+$/.test(staffForm.staff_id.trim())) {
+            setError("Staff ID must contain numbers only.");
+            return;
+        }
+
         if (!staffForm.first_name.trim()) {
             setError("First name is required.");
             return;
@@ -1036,6 +1041,11 @@ function StudentManagement() {
 
         if (!facultyForm.employee_id.trim()) {
             setError("Employee ID is required.");
+            return;
+        }
+
+        if (!/^\d+$/.test(facultyForm.employee_id.trim())) {
+            setError("Employee ID must contain numbers only.");
             return;
         }
 

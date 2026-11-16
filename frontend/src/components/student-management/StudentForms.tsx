@@ -10,11 +10,28 @@ const COURSES = ["BSIT", "BSBA", "MidWifery", "BSHM", "BLIS", "BSED", "BSCRIM"];
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SEX_OPTIONS = ["Male", "Female"];
 
-// Student ID: strictly digits (numbers) only, no letters, no special characters!
-const sanitizeStudentId = (val: string) => val.replace(/[^0-9]/g, "").slice(0, 15);
+// All patient IDs (Student ID, Staff ID, Faculty Employee ID): strictly digits (numbers) only, no letters, no special characters!
+const sanitizeNumericId = (val: string) => val.replace(/[^0-9]/g, "").slice(0, 15);
 
-// Staff ID & Faculty Employee ID: alphanumeric and hyphens (e.g. STF-001, FAC-001)
-const sanitizeEmployeeId = (val: string) => val.replace(/[^a-zA-Z0-9-]/g, "").toUpperCase().slice(0, 20);
+// Keydown handler allowing only numeric keys, control keys, and clipboard shortcuts
+const allowOnlyDigitsKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+        return;
+    }
+    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z'].includes(e.key.toLowerCase())) {
+        return;
+    }
+    if (!/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+    }
+};
+
+// Beforeinput handler for mobile / virtual keyboards and composition
+const allowOnlyDigitsBeforeInput = (e: React.FormEvent<HTMLInputElement> & { data?: string }) => {
+    if (e.data && !/^[0-9]+$/.test(e.data)) {
+        e.preventDefault();
+    }
+};
 
 // Disallow numbers and special characters for names (allows letters, spaces, hyphens, periods, apostrophes, and Philippine letters like ñ/Ñ)
 const sanitizeName = (val: string) => val.replace(/[0-9]/g, "").replace(/[^a-zA-Z\sñÑ\-.']/g, "");
@@ -153,7 +170,7 @@ export function StudentForms({
     const onStudentSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         setLocalError("");
-        if (!studentForm.student_id || studentForm.student_id.trim() === "") {
+        if (!studentForm.student_id || studentForm.student_id.trim() === "" || !/^\d+$/.test(studentForm.student_id.trim())) {
             setLocalError("Please enter a valid Student ID (numbers only).");
             return;
         }
@@ -168,6 +185,10 @@ export function StudentForms({
     const onStaffSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         setLocalError("");
+        if (!staffForm.staff_id || staffForm.staff_id.trim() === "" || !/^\d+$/.test(staffForm.staff_id.trim())) {
+            setLocalError("Please enter a valid Staff ID (numbers only).");
+            return;
+        }
         if (staffForm.birth_date) {
             const dateErr = validateBirthDate(staffForm.birth_date);
             if (dateErr) {
@@ -181,6 +202,10 @@ export function StudentForms({
     const onFacultySubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         setLocalError("");
+        if (!facultyForm.employee_id || facultyForm.employee_id.trim() === "" || !/^\d+$/.test(facultyForm.employee_id.trim())) {
+            setLocalError("Please enter a valid Employee ID (numbers only).");
+            return;
+        }
         if (facultyForm.birth_date) {
             const dateErr = validateBirthDate(facultyForm.birth_date);
             if (dateErr) {
@@ -306,22 +331,18 @@ export function StudentForms({
                                     setStudentForm({
                                         ...studentForm,
                                         student_id:
-                                            sanitizeStudentId(e.target.value),
+                                            sanitizeNumericId(e.target.value),
                                     })
                                 }
-                                onKeyDown={(e) => {
-                                    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
-                                    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return;
-                                    if (!/^[0-9]$/.test(e.key)) {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                onKeyDown={allowOnlyDigitsKeyDown}
+                                onBeforeInput={allowOnlyDigitsBeforeInput}
                                 onPaste={(e) => {
                                     e.preventDefault();
                                     const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
                                     setStudentForm({ ...studentForm, student_id: text });
                                 }}
                                 inputMode="numeric"
+                                pattern="[0-9]*"
                                 placeholder="e.g. 20241041"
                                 maxLength={15}
                                 required
@@ -563,10 +584,20 @@ export function StudentForms({
                                     setStaffForm({
                                         ...staffForm,
                                         staff_id:
-                                            sanitizeEmployeeId(e.target.value),
+                                            sanitizeNumericId(e.target.value),
                                     })
                                 }
-                                placeholder="e.g. STF-001"
+                                onKeyDown={allowOnlyDigitsKeyDown}
+                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
+                                    setStaffForm({ ...staffForm, staff_id: text });
+                                }}
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="e.g. 10023"
+                                maxLength={15}
                                 required
                             />
 
@@ -785,11 +816,21 @@ export function StudentForms({
                                     setFacultyForm({
                                         ...facultyForm,
                                         employee_id:
-                                            sanitizeEmployeeId(e.target.value),
+                                            sanitizeNumericId(e.target.value),
                                     })
                                 }
+                                onKeyDown={allowOnlyDigitsKeyDown}
+                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
+                                    setFacultyForm({ ...facultyForm, employee_id: text });
+                                }}
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="e.g. 20045"
+                                maxLength={15}
                                 required
-                                placeholder="Example: FAC-001"
                             />
 
 
