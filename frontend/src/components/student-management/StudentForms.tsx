@@ -1,4 +1,5 @@
 import { useState, type Dispatch, type FormEventHandler, type SetStateAction } from "react";
+import { GraduationCap, BookOpen, Briefcase } from "lucide-react";
 import { Modal, InputField, SelectField, DateOfBirthField } from "./FieldsAndModals";
 
 export interface StudentFormValues { student_id: string; first_name: string; middle_name: string; last_name: string; course: string; year_level: string; section: string; sex: string; birth_date: string; contact_number: string; address: string; }
@@ -41,9 +42,112 @@ const validateBirthDate = (d: string) => {
     return null;
 };
 
-type StudentFormsProps = { showStudentForm: boolean; editingStudent: boolean; closeStudentForm: () => void; handleStudentSubmit: React.FormEventHandler<HTMLFormElement>; studentForm: StudentFormValues; setStudentForm: React.Dispatch<React.SetStateAction<StudentFormValues>>; saving: boolean; showStaffForm: boolean; editingStaff: boolean; closeStaffForm: () => void; handleStaffSubmit: React.FormEventHandler<HTMLFormElement>; staffForm: StaffFormValues; setStaffForm: React.Dispatch<React.SetStateAction<StaffFormValues>>; showFacultyForm: boolean; editingFaculty: boolean; closeFacultyForm: () => void; handleFacultySubmit: React.FormEventHandler<HTMLFormElement>; facultyForm: FacultyFormValues; setFacultyForm: React.Dispatch<React.SetStateAction<FacultyFormValues>>; };
+type StudentFormsProps = {
+    showStudentForm: boolean;
+    editingStudent: boolean;
+    closeStudentForm: () => void;
+    handleStudentSubmit: React.FormEventHandler<HTMLFormElement>;
+    studentForm: StudentFormValues;
+    setStudentForm: React.Dispatch<React.SetStateAction<StudentFormValues>>;
+    saving: boolean;
+    showStaffForm: boolean;
+    editingStaff: boolean;
+    closeStaffForm: () => void;
+    handleStaffSubmit: React.FormEventHandler<HTMLFormElement>;
+    staffForm: StaffFormValues;
+    setStaffForm: React.Dispatch<React.SetStateAction<StaffFormValues>>;
+    showFacultyForm: boolean;
+    editingFaculty: boolean;
+    closeFacultyForm: () => void;
+    handleFacultySubmit: React.FormEventHandler<HTMLFormElement>;
+    facultyForm: FacultyFormValues;
+    setFacultyForm: React.Dispatch<React.SetStateAction<FacultyFormValues>>;
+    onSwitchCategory?: (cat: "student" | "faculty" | "staff") => void;
+};
 
-export function StudentForms({ showStudentForm, editingStudent, closeStudentForm, handleStudentSubmit, studentForm, setStudentForm, saving, showStaffForm, editingStaff, closeStaffForm, handleStaffSubmit, staffForm, setStaffForm, showFacultyForm, editingFaculty, closeFacultyForm, handleFacultySubmit, facultyForm, setFacultyForm }: StudentFormsProps) {
+function PatientCategorySelector({
+    activeCategory,
+    onSelect,
+}: {
+    activeCategory: "student" | "faculty" | "staff";
+    onSelect?: (cat: "student" | "faculty" | "staff") => void;
+}) {
+    if (!onSelect) return null;
+
+    return (
+        <div className="mb-5 rounded-2xl bg-[#f7f2eb] p-2 dark:bg-[#251f19] border border-[#e8dfd4] dark:border-[#382f25]">
+            <div className="flex items-center justify-between px-2 pt-0.5 pb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                    Patient Category
+                </span>
+                <span className="text-[11px] font-semibold text-[#8a6f50] dark:text-[#d3bca2]">
+                    Select Record Type
+                </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+                <button
+                    type="button"
+                    onClick={() => onSelect("student")}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs sm:text-sm font-bold transition-all ${
+                        activeCategory === "student"
+                            ? "bg-[#70091f] text-white shadow-md shadow-[#70091f]/20 scale-[1.01]"
+                            : "bg-white/80 text-stone-600 hover:text-stone-900 hover:bg-white dark:bg-[#1a1612]/60 dark:text-stone-300 dark:hover:bg-[#1a1612]"
+                    }`}
+                >
+                    <GraduationCap size={16} />
+                    <span>Student</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => onSelect("faculty")}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs sm:text-sm font-bold transition-all ${
+                        activeCategory === "faculty"
+                            ? "bg-[#70091f] text-white shadow-md shadow-[#70091f]/20 scale-[1.01]"
+                            : "bg-white/80 text-stone-600 hover:text-stone-900 hover:bg-white dark:bg-[#1a1612]/60 dark:text-stone-300 dark:hover:bg-[#1a1612]"
+                    }`}
+                >
+                    <BookOpen size={16} />
+                    <span>Faculty</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => onSelect("staff")}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs sm:text-sm font-bold transition-all ${
+                        activeCategory === "staff"
+                            ? "bg-[#70091f] text-white shadow-md shadow-[#70091f]/20 scale-[1.01]"
+                            : "bg-white/80 text-stone-600 hover:text-stone-900 hover:bg-white dark:bg-[#1a1612]/60 dark:text-stone-300 dark:hover:bg-[#1a1612]"
+                    }`}
+                >
+                    <Briefcase size={16} />
+                    <span>Staff</span>
+                </button>
+            </div>
+        </div>
+    );
+}
+
+export function StudentForms({
+    showStudentForm,
+    editingStudent,
+    closeStudentForm,
+    handleStudentSubmit,
+    studentForm,
+    setStudentForm,
+    saving,
+    showStaffForm,
+    editingStaff,
+    closeStaffForm,
+    handleStaffSubmit,
+    staffForm,
+    setStaffForm,
+    showFacultyForm,
+    editingFaculty,
+    closeFacultyForm,
+    handleFacultySubmit,
+    facultyForm,
+    setFacultyForm,
+    onSwitchCategory,
+}: StudentFormsProps) {
     const [localError, setLocalError] = useState("");
 
     const onStudentSubmit: FormEventHandler<HTMLFormElement> = (e) => {
@@ -117,6 +221,13 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                         onSubmit={onStudentSubmit}
                         className="p-6"
                     >
+                        {!editingStudent && (
+                            <PatientCategorySelector
+                                activeCategory="student"
+                                onSelect={onSwitchCategory}
+                            />
+                        )}
+
                         {localError && (
                             <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
                                 <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,37 +238,6 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                         )}
 
                         <div className="grid gap-4 md:grid-cols-2">
-
-                            <InputField
-                                label="Student ID"
-                                value={
-                                    studentForm.student_id
-                                }
-                                onChange={(e) =>
-                                    setStudentForm({
-                                        ...studentForm,
-                                        student_id:
-                                            sanitizeStudentId(e.target.value),
-                                    })
-                                }
-                                onKeyDown={(e) => {
-                                    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
-                                    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return;
-                                    if (!/^[0-9]$/.test(e.key)) {
-                                        e.preventDefault();
-                                    }
-                                }}
-                                onPaste={(e) => {
-                                    e.preventDefault();
-                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
-                                    setStudentForm({ ...studentForm, student_id: text });
-                                }}
-                                inputMode="numeric"
-                                placeholder="e.g. 20241041"
-                                maxLength={15}
-                                required
-                            />
-
                             <InputField
                                 label="First Name"
                                 value={
@@ -167,6 +247,26 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStudentForm({
                                         ...studentForm,
                                         first_name:
+                                            sanitizeName(e.target.value),
+                                    })
+                                }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                required
+                            />
+
+                            <InputField
+                                label="Last Name"
+                                value={
+                                    studentForm.last_name
+                                }
+                                onChange={(e) =>
+                                    setStudentForm({
+                                        ...studentForm,
+                                        last_name:
                                             sanitizeName(e.target.value),
                                     })
                                 }
@@ -198,22 +298,32 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             />
 
                             <InputField
-                                label="Last Name"
+                                label="Student ID"
                                 value={
-                                    studentForm.last_name
+                                    studentForm.student_id
                                 }
                                 onChange={(e) =>
                                     setStudentForm({
                                         ...studentForm,
-                                        last_name:
-                                            sanitizeName(e.target.value),
+                                        student_id:
+                                            sanitizeStudentId(e.target.value),
                                     })
                                 }
                                 onKeyDown={(e) => {
-                                    if (/^[0-9]$/.test(e.key)) {
+                                    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+                                    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return;
+                                    if (!/^[0-9]$/.test(e.key)) {
                                         e.preventDefault();
                                     }
                                 }}
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
+                                    setStudentForm({ ...studentForm, student_id: text });
+                                }}
+                                inputMode="numeric"
+                                placeholder="e.g. 20241041"
+                                maxLength={15}
                                 required
                             />
 
@@ -368,6 +478,13 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                         onSubmit={onStaffSubmit}
                         className="p-6"
                     >
+                        {!editingStaff && (
+                            <PatientCategorySelector
+                                activeCategory="staff"
+                                onSelect={onSwitchCategory}
+                            />
+                        )}
+
                         {localError && (
                             <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
                                 <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -378,23 +495,6 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                         )}
 
                         <div className="grid gap-4 md:grid-cols-2">
-
-                            <InputField
-                                label="Staff ID"
-                                value={
-                                    staffForm.staff_id
-                                }
-                                onChange={(e) =>
-                                    setStaffForm({
-                                        ...staffForm,
-                                        staff_id:
-                                            sanitizeEmployeeId(e.target.value),
-                                    })
-                                }
-                                placeholder="e.g. STF-001"
-                                required
-                            />
-
                             <InputField
                                 label="First Name"
                                 value={
@@ -404,6 +504,26 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                     setStaffForm({
                                         ...staffForm,
                                         first_name:
+                                            sanitizeName(e.target.value),
+                                    })
+                                }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                required
+                            />
+
+                            <InputField
+                                label="Last Name"
+                                value={
+                                    staffForm.last_name
+                                }
+                                onChange={(e) =>
+                                    setStaffForm({
+                                        ...staffForm,
+                                        last_name:
                                             sanitizeName(e.target.value),
                                     })
                                 }
@@ -435,22 +555,18 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                             />
 
                             <InputField
-                                label="Last Name"
+                                label="Staff ID"
                                 value={
-                                    staffForm.last_name
+                                    staffForm.staff_id
                                 }
                                 onChange={(e) =>
                                     setStaffForm({
                                         ...staffForm,
-                                        last_name:
-                                            sanitizeName(e.target.value),
+                                        staff_id:
+                                            sanitizeEmployeeId(e.target.value),
                                     })
                                 }
-                                onKeyDown={(e) => {
-                                    if (/^[0-9]$/.test(e.key)) {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                placeholder="e.g. STF-001"
                                 required
                             />
 
@@ -584,6 +700,13 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                         onSubmit={onFacultySubmit}
                         className="p-6"
                     >
+                        {!editingFaculty && (
+                            <PatientCategorySelector
+                                activeCategory="faculty"
+                                onSelect={onSwitchCategory}
+                            />
+                        )}
+
                         {localError && (
                             <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
                                 <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -594,25 +717,6 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                         )}
 
                         <div className="grid gap-4 md:grid-cols-2">
-
-
-                            <InputField
-                                label="Employee ID"
-                                value={
-                                    facultyForm.employee_id
-                                }
-                                onChange={(e) =>
-                                    setFacultyForm({
-                                        ...facultyForm,
-                                        employee_id:
-                                            sanitizeEmployeeId(e.target.value),
-                                    })
-                                }
-                                required
-                                placeholder="Example: FAC-001"
-                            />
-
-
                             <InputField
                                 label="First Name"
                                 value={
@@ -633,6 +737,25 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                 required
                             />
 
+                            <InputField
+                                label="Last Name"
+                                value={
+                                    facultyForm.last_name
+                                }
+                                onChange={(e) =>
+                                    setFacultyForm({
+                                        ...facultyForm,
+                                        last_name:
+                                            sanitizeName(e.target.value),
+                                    })
+                                }
+                                onKeyDown={(e) => {
+                                    if (/^[0-9]$/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                required
+                            />
 
                             <InputField
                                 label="Middle Name"
@@ -653,25 +776,20 @@ export function StudentForms({ showStudentForm, editingStudent, closeStudentForm
                                 }}
                             />
 
-
                             <InputField
-                                label="Last Name"
+                                label="Employee ID"
                                 value={
-                                    facultyForm.last_name
+                                    facultyForm.employee_id
                                 }
                                 onChange={(e) =>
                                     setFacultyForm({
                                         ...facultyForm,
-                                        last_name:
-                                            sanitizeName(e.target.value),
+                                        employee_id:
+                                            sanitizeEmployeeId(e.target.value),
                                     })
                                 }
-                                onKeyDown={(e) => {
-                                    if (/^[0-9]$/.test(e.key)) {
-                                        e.preventDefault();
-                                    }
-                                }}
                                 required
+                                placeholder="Example: FAC-001"
                             />
 
 

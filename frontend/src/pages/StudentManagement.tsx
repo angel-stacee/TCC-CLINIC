@@ -646,6 +646,59 @@ function StudentManagement() {
         });
     };
 
+    const handleSwitchCategory = (category: "student" | "faculty" | "staff") => {
+        if (category === "student") {
+            const currentSource = showFacultyForm ? facultyForm : staffForm;
+            setStudentForm((prev) => ({
+                ...prev,
+                first_name: currentSource.first_name || prev.first_name,
+                middle_name: currentSource.middle_name || prev.middle_name,
+                last_name: currentSource.last_name || prev.last_name,
+                sex: currentSource.sex || prev.sex,
+                birth_date: currentSource.birth_date || prev.birth_date,
+                contact_number: currentSource.contact_number || prev.contact_number,
+                address: currentSource.address || prev.address,
+            }));
+            setShowFacultyForm(false);
+            setShowStaffForm(false);
+            setShowStudentForm(true);
+        } else if (category === "faculty") {
+            const currentSource = showStudentForm ? studentForm : staffForm;
+            setFacultyForm((prev) => ({
+                ...prev,
+                first_name: currentSource.first_name || prev.first_name,
+                middle_name: currentSource.middle_name || prev.middle_name,
+                last_name: currentSource.last_name || prev.last_name,
+                sex: currentSource.sex || prev.sex,
+                birth_date: currentSource.birth_date || prev.birth_date,
+                contact_number: currentSource.contact_number || prev.contact_number,
+                address: currentSource.address || prev.address,
+                department: (showStaffForm ? staffForm.department : prev.department) || "",
+                position: (showStaffForm ? staffForm.position : prev.position) || "",
+            }));
+            setShowStudentForm(false);
+            setShowStaffForm(false);
+            setShowFacultyForm(true);
+        } else if (category === "staff") {
+            const currentSource = showStudentForm ? studentForm : facultyForm;
+            setStaffForm((prev) => ({
+                ...prev,
+                first_name: currentSource.first_name || prev.first_name,
+                middle_name: currentSource.middle_name || prev.middle_name,
+                last_name: currentSource.last_name || prev.last_name,
+                sex: currentSource.sex || prev.sex,
+                birth_date: currentSource.birth_date || prev.birth_date,
+                contact_number: currentSource.contact_number || prev.contact_number,
+                address: currentSource.address || prev.address,
+                department: (showFacultyForm ? facultyForm.department : prev.department) || "",
+                position: (showFacultyForm ? facultyForm.position : prev.position) || "",
+            }));
+            setShowStudentForm(false);
+            setShowFacultyForm(false);
+            setShowStaffForm(true);
+        }
+    };
+
 
 
 
@@ -1349,7 +1402,18 @@ function StudentManagement() {
                         </p>
                     </div>
 
-                    <div className="relative" ref={addPatientDropdownRef}>
+                    <div className="relative inline-flex items-center rounded-xl bg-[#8a6f50] shadow-sm" ref={addPatientDropdownRef}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setError("");
+                                setShowAddPatientDropdown(false);
+                                openStudentForm();
+                            }}
+                            className="inline-flex items-center gap-2 rounded-l-xl px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
+                        >
+                            <span>+ Add Patient</span>
+                        </button>
                         <button
                             type="button"
                             onClick={() => {
@@ -1358,9 +1422,9 @@ function StudentManagement() {
                             }}
                             aria-expanded={showAddPatientDropdown}
                             aria-haspopup="true"
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#8a6f50] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
+                            aria-label="Select patient category"
+                            className="inline-flex items-center justify-center rounded-r-xl border-l border-[#9c8163] px-3 py-3 text-white transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
                         >
-                            <span>+ Add Patient</span>
                             <ChevronDown
                                 size={16}
                                 aria-hidden="true"
@@ -2128,7 +2192,28 @@ function StudentManagement() {
 
 
 
-            <StudentForms showStudentForm={showStudentForm} editingStudent={Boolean(editingStudent)} closeStudentForm={closeStudentForm} handleStudentSubmit={handleStudentSubmit} studentForm={studentForm} setStudentForm={setStudentForm} saving={saving} showStaffForm={showStaffForm} editingStaff={Boolean(editingStaff)} closeStaffForm={closeStaffForm} handleStaffSubmit={handleStaffSubmit} staffForm={staffForm} setStaffForm={setStaffForm} showFacultyForm={showFacultyForm} editingFaculty={Boolean(editingFaculty)} closeFacultyForm={closeFacultyForm} handleFacultySubmit={handleFacultySubmit} facultyForm={facultyForm} setFacultyForm={setFacultyForm} />
+            <StudentForms
+                showStudentForm={showStudentForm}
+                editingStudent={Boolean(editingStudent)}
+                closeStudentForm={closeStudentForm}
+                handleStudentSubmit={handleStudentSubmit}
+                studentForm={studentForm}
+                setStudentForm={setStudentForm}
+                saving={saving}
+                showStaffForm={showStaffForm}
+                editingStaff={Boolean(editingStaff)}
+                closeStaffForm={closeStaffForm}
+                handleStaffSubmit={handleStaffSubmit}
+                staffForm={staffForm}
+                setStaffForm={setStaffForm}
+                showFacultyForm={showFacultyForm}
+                editingFaculty={Boolean(editingFaculty)}
+                closeFacultyForm={closeFacultyForm}
+                handleFacultySubmit={handleFacultySubmit}
+                facultyForm={facultyForm}
+                setFacultyForm={setFacultyForm}
+                onSwitchCategory={handleSwitchCategory}
+            />
 
 
 
