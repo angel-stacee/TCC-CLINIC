@@ -294,6 +294,7 @@ html.tcc-dark [class~="bg-[#fcf8f8]"],
 html.tcc-dark [class~="bg-[#fcf8f5]"],
 html.tcc-dark [class~="bg-[#fcfaf6]"],
 html.tcc-dark [class~="bg-[#fff8f8]"],
+html.tcc-dark [class~="bg-[#f2e9dc]"],
 html.tcc-dark [class~="bg-[#fffdf9]"] {
     background-color: #29231d !important;
 }

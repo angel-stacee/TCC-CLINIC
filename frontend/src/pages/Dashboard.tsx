@@ -2498,7 +2498,7 @@ function Dashboard() {
 
                                                         <div className="flex items-center gap-2.5">
 
-                                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fcebe7] text-xs font-bold text-[#70091f]">
+                                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fcebe7] text-xs font-bold text-[#70091f] dark:bg-[#70091f]/30 dark:!text-[#f8a598] dark:ring-1 dark:ring-[#70091f]/40">
                                                                 {getInitials(
                                                                     getName(
                                                                         patient
@@ -2514,7 +2514,17 @@ function Dashboard() {
                                                                 </span>
 
                                                                 {patient.patient_type && (
-                                                                    <span className="inline-block rounded bg-[#f2e9dc] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#70091f]">
+                                                                    <span
+                                                                        className={`inline-block rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                                                                            String(patient.patient_type).toLowerCase() === "student"
+                                                                                ? "border border-[#70091f]/20 bg-[#70091f]/10 text-[#70091f] dark:border-[#70091f]/50 dark:bg-[#70091f]/35 dark:!text-[#f8a598]"
+                                                                                : String(patient.patient_type).toLowerCase() === "faculty"
+                                                                                  ? "border border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/60 dark:!text-blue-300"
+                                                                                  : String(patient.patient_type).toLowerCase() === "staff"
+                                                                                    ? "border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/60 dark:bg-amber-950/60 dark:!text-amber-300"
+                                                                                    : "border border-stone-200 bg-stone-100 text-stone-700 dark:border-stone-700 dark:bg-stone-800 dark:!text-stone-300"
+                                                                        }`}
+                                                                    >
                                                                         {patient.patient_type}
                                                                     </span>
                                                                 )}
