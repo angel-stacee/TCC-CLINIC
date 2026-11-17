@@ -405,7 +405,7 @@ function Medicine() {
             return {
                 label: "Out of Stock",
                 className:
-                    "bg-red-50 text-red-700 border-red-100",
+                    "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800/60",
             };
         }
 
@@ -413,14 +413,14 @@ function Medicine() {
             return {
                 label: "Low Stock",
                 className:
-                    "bg-amber-50 text-amber-700 border-amber-100",
+                    "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/60",
             };
         }
 
         return {
             label: "In Stock",
             className:
-                "bg-green-50 text-green-700 border-green-100",
+                "bg-green-50 text-green-700 border-green-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60",
         };
     };
 
@@ -1236,7 +1236,7 @@ function Medicine() {
                                                             const exp = getExpirationInfo(medicine.expiration_date);
                                                             if (exp.status === "expired") {
                                                                 return (
-                                                                    <span className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-700">
+                                                                    <span className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800/60">
                                                                         <AlertOctagon size={11} className="shrink-0" />
                                                                         Expired: {exp.formattedDate}
                                                                     </span>
@@ -1244,7 +1244,7 @@ function Medicine() {
                                                             }
                                                             if (exp.status === "expiring_soon") {
                                                                 return (
-                                                                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                                                                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/60">
                                                                         <Calendar size={11} className="shrink-0" />
                                                                         {exp.formattedDate} ({exp.days}d)
                                                                     </span>
@@ -1252,8 +1252,8 @@ function Medicine() {
                                                             }
                                                             if (exp.status === "valid") {
                                                                 return (
-                                                                    <span className="inline-flex items-center gap-1 text-[11px] text-[#554a3e]">
-                                                                        <Calendar size={12} className="text-[#a89d8f]" />
+                                                                    <span className="inline-flex items-center gap-1 text-[11px] text-[#554a3e] dark:text-stone-300">
+                                                                        <Calendar size={12} className="text-[#a89d8f] dark:text-stone-400" />
                                                                         {exp.formattedDate}
                                                                     </span>
                                                                 );
