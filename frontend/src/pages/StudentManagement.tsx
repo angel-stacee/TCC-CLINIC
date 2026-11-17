@@ -2523,8 +2523,18 @@ function StudentManagement() {
                                                         </td>
 
                                                         <td className="px-4 py-3">
-                                                            {visit.reason ||
-                                                                "-"}
+                                                            <div className="flex flex-col">
+                                                                <span className="font-medium text-stone-800 dark:text-stone-200">
+                                                                    {visit.reason?.toLowerCase() === "other" && visit.symptoms
+                                                                        ? visit.symptoms
+                                                                        : visit.reason || "-"}
+                                                                </span>
+                                                                {visit.reason?.toLowerCase() !== "other" && visit.symptoms && (
+                                                                    <span className="text-xs text-stone-500 dark:text-stone-400">
+                                                                        {visit.symptoms}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </td>
 
                                                         <td className="px-4 py-3">

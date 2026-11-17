@@ -922,8 +922,9 @@ function Dashboard() {
 
         recentVisits.forEach((visit) => {
             const reason =
-                visit.reason?.trim() ||
-                "Other";
+                visit.reason?.trim()?.toLowerCase() === "other" && visit.symptoms?.trim()
+                    ? visit.symptoms.trim()
+                    : visit.reason?.trim() || "Other";
 
             count[reason] =
                 (count[reason] || 0) + 1;
@@ -1428,8 +1429,9 @@ function Dashboard() {
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="min-w-0">
                                                                         <p className="text-sm font-semibold">
-                                                                            {visit.reason?.trim() ||
-                                                                                "Clinic Visit"}
+                                                                            {visit.reason?.trim()?.toLowerCase() === "other" && visit.symptoms?.trim()
+                                                                                ? visit.symptoms.trim()
+                                                                                : visit.reason?.trim() || "Clinic Visit"}
                                                                         </p>
 
                                                                         <p className="mt-1 text-xs text-[#887d70]">
@@ -2161,8 +2163,9 @@ function Dashboard() {
                                                     </div>
 
                                                     <span className="shrink-0 rounded-full bg-[#f6eee4] px-2.5 py-1 text-xs font-medium text-[#70091f]">
-                                                        {visit.reason?.trim() ||
-                                                            "Other"}
+                                                        {visit.reason?.trim()?.toLowerCase() === "other" && visit.symptoms?.trim()
+                                                            ? visit.symptoms.trim()
+                                                            : visit.reason?.trim() || "Other"}
                                                     </span>
                                                 </li>
                                             );

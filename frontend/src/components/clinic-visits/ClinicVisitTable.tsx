@@ -33,7 +33,7 @@ function renderReasonBadge(reason: string | null | undefined, symptoms?: string 
         colorStyle = "border-[#ebdcd5] bg-[#fdf5f3] text-[#70091f] dark:border-[#521320] dark:bg-[#70091f]/25 dark:text-[#f8a598]";
     }
 
-    const displayText = lower === "other" && symptoms ? `Other · ${symptoms}` : r;
+    const displayText = lower === "other" && symptoms ? symptoms : r;
 
     return (
         <div className="flex flex-col items-start gap-0.5">

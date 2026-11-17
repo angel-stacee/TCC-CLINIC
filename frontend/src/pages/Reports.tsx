@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
-import { getCachedRecord } from "../services/recordCache";
+import { getCachedRecord, invalidateRecordCache } from "../services/recordCache";
 
 import {
     FileText,
@@ -47,6 +47,7 @@ type VisitRecord = {
     person: string;
     person_type: string;
     reason: string | null;
+    symptoms?: string | null;
     medicine: string | null;
     medicine_quantity: number | string | null;
     nurse: string | null;
@@ -86,20 +87,29 @@ function Reports() {
         "December",
     ];
 
-    const generateReport = async (targetMonth = month, targetYear = year) => {
+    const generateReport = async (targetMonth = month, targetYear = year, force = false) => {
         setLoading(true);
         setError("");
 
         try {
-            const response = await getCachedRecord(
-                `reports:monthly:${targetYear}:${targetMonth}`,
-                () => api.get<MonthlyReport>("/reports/monthly", {
+            if (force) {
+                invalidateRecordCache();
+            }
+
+            const fetchReport = () =>
+                api.get<MonthlyReport>("/reports/monthly", {
                     params: {
                         month: targetMonth,
                         year: targetYear,
                     },
-                })
-            );
+                });
+
+            const response = force
+                ? await fetchReport()
+                : await getCachedRecord(
+                    `reports:monthly:${targetYear}:${targetMonth}`,
+                    fetchReport
+                );
 
             setReport(response.data);
         } catch (err: any) {
@@ -118,12 +128,12 @@ function Reports() {
 
     const handleMonthChange = (newMonth: number) => {
         setMonth(newMonth);
-        generateReport(newMonth, year);
+        generateReport(newMonth, year, true);
     };
 
     const handleYearChange = (newYear: number) => {
         setYear(newYear);
-        generateReport(month, newYear);
+        generateReport(month, newYear, true);
     };
 
     useEffect(() => {
@@ -258,9 +268,9 @@ function Reports() {
 
                     <div className="flex items-end">
                         <button
-                            onClick={() => generateReport(month, year)}
+                            onClick={() => generateReport(month, year, true)}
                             disabled={loading}
-                            className="rounded-xl bg-[#8a6f50] px-6 py-3 text-sm font-semibold text-white hover:bg-[#8a6f50] disabled:opacity-50"
+                            className="rounded-xl bg-[#8a6f50] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#735a40] disabled:opacity-50"
                         >
                             {loading
                                 ? "Generating..."
@@ -446,7 +456,20 @@ function Reports() {
                                             <td className="px-4 py-3 text-sm text-stone-600">{formatVisitDate(visit.date)}</td>
                                             <td className="px-4 py-3 text-sm font-semibold text-stone-800">{visit.person}</td>
                                             <td className="px-4 py-3 text-sm text-stone-600">{visit.person_type}</td>
-                                            <td className="px-4 py-3 text-sm text-stone-700">{visit.reason || "—"}</td>
+                                            <td className="px-4 py-3 text-sm text-stone-700">
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-stone-800">
+                                                        {visit.reason?.toLowerCase() === "other" && visit.symptoms
+                                                            ? visit.symptoms
+                                                            : visit.reason || "—"}
+                                                    </span>
+                                                    {visit.reason?.toLowerCase() !== "other" && visit.symptoms && (
+                                                        <span className="text-xs text-stone-500">
+                                                            {visit.symptoms}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
                                             <td className="px-4 py-3 text-sm text-stone-600">
                                                 {visit.medicine ? `${visit.medicine}${visit.medicine_quantity ? ` · ${visit.medicine_quantity}` : ""}` : "—"}
                                             </td>
