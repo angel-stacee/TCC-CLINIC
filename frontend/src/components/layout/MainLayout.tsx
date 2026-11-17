@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import Sidebar from "./Sidebar";
 import { PageLoadingContent } from "./PageLoading";
@@ -11,6 +11,16 @@ interface MainLayoutProps {
 
 function MainLayout({ children }: MainLayoutProps): React.JSX.Element {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const location = useLocation();
+    const [isPageTransitioning, setIsPageTransitioning] = useState(false);
+
+    useEffect(() => {
+        setIsPageTransitioning(true);
+        const timer = setTimeout(() => {
+            setIsPageTransitioning(false);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [location.pathname]);
 
     useEffect(() => {
         const isDark = localStorage.getItem("tcc-theme") === "dark";
@@ -76,10 +86,17 @@ function MainLayout({ children }: MainLayoutProps): React.JSX.Element {
                 setSidebarOpen={setSidebarOpen}
             />
 
+            {/* Top Route Transition Loading Bar */}
+            {isPageTransitioning && (
+                <div className="fixed top-0 left-0 right-0 z-50 h-0.5 overflow-hidden bg-stone-200/40 dark:bg-stone-800/40 pointer-events-none">
+                    <div className="h-full w-full bg-gradient-to-r from-[#8a6f50] via-[#70091f] to-[#8a6f50] animate-pulse" />
+                </div>
+            )}
+
             <main className="min-h-screen w-full pt-16 lg:ml-[264px] lg:w-[calc(100%-264px)] lg:pt-0">
                 <div className="w-full max-w-full">
                     <ErrorBoundary>
-                        <Suspense fallback={<PageLoadingContent />}>
+                        <Suspense key={location.pathname} fallback={<PageLoadingContent />}>
                             {children || <Outlet />}
                         </Suspense>
                     </ErrorBoundary>

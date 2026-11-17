@@ -1795,8 +1795,27 @@ function StudentManagement() {
                 </div>
 
                 {loading ? (
-                    <div className="rounded-xl border border-stone-200 bg-white p-10 text-center text-sm text-stone-500">
-                        Loading records...
+                    <div className="rounded-2xl border border-[#e8dfd4] bg-white p-6 shadow-sm animate-pulse dark:border-[#4e4234] dark:bg-[#211c17]">
+                        <div className="mb-6 flex items-center justify-between">
+                            <div className="h-6 w-44 rounded-lg bg-stone-200 dark:bg-stone-800" />
+                            <div className="h-8 w-28 rounded-lg bg-stone-100 dark:bg-stone-800/60" />
+                        </div>
+                        <div className="space-y-3.5">
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                <div
+                                    key={i}
+                                    className="flex items-center gap-4 py-3 border-b border-stone-100 dark:border-stone-800/60 last:border-none"
+                                >
+                                    <div className="h-10 w-10 shrink-0 rounded-full bg-stone-200 dark:bg-stone-800" />
+                                    <div className="flex-1 space-y-1.5">
+                                        <div className="h-4 w-1/3 rounded bg-stone-200 dark:bg-stone-800" />
+                                        <div className="h-3 w-1/4 rounded bg-stone-100 dark:bg-stone-800/60" />
+                                    </div>
+                                    <div className="hidden sm:block h-6 w-20 rounded-full bg-stone-100 dark:bg-stone-800/60" />
+                                    <div className="h-8 w-24 rounded-lg bg-stone-200 dark:bg-stone-800" />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 ) : (
                     <>

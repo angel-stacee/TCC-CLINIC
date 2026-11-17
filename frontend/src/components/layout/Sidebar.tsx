@@ -28,11 +28,17 @@ const routePrefetchers: Record<string, () => void> = {
     "/reports": () => { import("../../pages/Reports"); },
     "/organization": () => { import("../../pages/Organization"); },
     "/settings": () => { import("../../pages/Settings"); },
+    "/profile": () => { import("../../pages/Profile"); },
 };
 
 function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): React.JSX.Element {
     const location = useLocation();
     const navigate = useNavigate();
+    const [pendingPath, setPendingPath] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        setPendingPath(null);
+    }, [location.pathname]);
 
     const handleLogout = async () => {
         if (setSidebarOpen) {
@@ -97,7 +103,11 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): React.JSX.Eleme
         },
     ];
 
-    const handleNavigation = () => {
+    const handleNavigation = (path: string) => {
+        if (path !== location.pathname) {
+            setPendingPath(path);
+            handlePrefetch(path);
+        }
         if (setSidebarOpen) {
             setSidebarOpen(false);
         }
@@ -184,7 +194,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): React.JSX.Eleme
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                onClick={handleNavigation}
+                                onClick={() => handleNavigation(item.path)}
                                 onMouseEnter={() => handlePrefetch(item.path)}
                                 onFocus={() => handlePrefetch(item.path)}
                                 aria-current={isActive ? "page" : undefined}
@@ -224,6 +234,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): React.JSX.Eleme
                                 <span className="text-[14px] font-medium">
                                     {item.name}
                                 </span>
+
+                                {pendingPath === item.path && location.pathname !== item.path && (
+                                    <span className="ml-auto flex h-2 w-2 relative">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#fcebe7] opacity-75" />
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#fcebe7]" />
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}

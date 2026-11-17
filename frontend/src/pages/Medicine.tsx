@@ -1143,14 +1143,36 @@ function Medicine() {
                             <tbody>
 
                                 {loading ? (
-                                    <tr>
-                                        <td
-                                            colSpan={8}
-                                            className="py-12 text-center text-xs text-[#887d70]"
-                                        >
-                                            Loading medicines...
-                                        </td>
-                                    </tr>
+                                    <>
+                                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                                            <tr key={i} className="animate-pulse border-b border-stone-100 dark:border-stone-800/60">
+                                                <td className="px-5 py-4">
+                                                    <div className="h-4 w-36 rounded bg-stone-200 dark:bg-stone-800" />
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <div className="h-5 w-24 rounded-full bg-stone-100 dark:bg-stone-800/60" />
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <div className="h-4 w-16 rounded bg-stone-200 dark:bg-stone-800" />
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <div className="h-4 w-12 rounded bg-stone-200 dark:bg-stone-800" />
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <div className="h-4 w-12 rounded bg-stone-200 dark:bg-stone-800" />
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <div className="h-4 w-20 rounded bg-stone-100 dark:bg-stone-800/60" />
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <div className="h-5 w-20 rounded-full bg-stone-200 dark:bg-stone-800" />
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <div className="h-7 w-16 rounded-lg bg-stone-200 dark:bg-stone-800" />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </>
                                 ) : filteredMedicines.length === 0 ? (
                                     <tr>
                                         <td
