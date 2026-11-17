@@ -1173,20 +1173,20 @@ export default function Organization(): React.JSX.Element {
                     </div>
 
                     {/* Quick Stats Badges */}
-                    <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                        <div className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-center shadow-sm dark:bg-[#251f19] dark:border-[#44382c]">
-                            <p className="text-lg font-bold text-[#70091f] dark:text-[#f38a7c]">
+                    <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+                        <div className="min-w-[110px] rounded-2xl border border-white/70 bg-white/90 px-5 py-3 text-center shadow-sm backdrop-blur-sm sm:min-w-[125px] sm:py-3.5 dark:border-[#44382c] dark:bg-[#251f19]/90">
+                            <p className="text-2xl font-extrabold tracking-tight text-[#70091f] sm:text-3xl dark:text-[#f38a7c]">
                                 {orgData.clinic.members.length}
                             </p>
-                            <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">
+                            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
                                 Clinic Staff
                             </p>
                         </div>
-                        <div className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-center shadow-sm dark:bg-[#251f19] dark:border-[#44382c]">
-                            <p className="text-lg font-bold text-[#d4a017]">
+                        <div className="min-w-[110px] rounded-2xl border border-white/70 bg-white/90 px-5 py-3 text-center shadow-sm backdrop-blur-sm sm:min-w-[125px] sm:py-3.5 dark:border-[#44382c] dark:bg-[#251f19]/90">
+                            <p className="text-2xl font-extrabold tracking-tight text-[#d4a017] sm:text-3xl dark:text-[#fbc02d]">
                                 {orgData.admin.members.length}
                             </p>
-                            <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">
+                            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
                                 College Admin
                             </p>
                         </div>
