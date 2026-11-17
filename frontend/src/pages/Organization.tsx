@@ -24,8 +24,6 @@ import {
     Save,
     RotateCcw,
     AlertCircle,
-    Database,
-    Loader2,
 } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
@@ -1176,24 +1174,6 @@ export default function Organization(): React.JSX.Element {
 
                     {/* Quick Stats Badges */}
                     <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                        <div className="inline-flex items-center gap-2 rounded-xl border border-white/60 bg-white/80 px-3 py-2 shadow-sm dark:bg-[#251f19] dark:border-[#44382c]">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                                {isSavingDb ? (
-                                    <Loader2 size={14} className="animate-spin text-amber-600" />
-                                ) : (
-                                    <Database size={14} />
-                                )}
-                            </div>
-                            <div className="text-left">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
-                                    Database
-                                </p>
-                                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                    {isSavingDb ? "Saving..." : "Auto-Sync Active"}
-                                </p>
-                            </div>
-                        </div>
-
                         <div className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-center shadow-sm dark:bg-[#251f19] dark:border-[#44382c]">
                             <p className="text-lg font-bold text-[#70091f] dark:text-[#f38a7c]">
                                 {orgData.clinic.members.length}
