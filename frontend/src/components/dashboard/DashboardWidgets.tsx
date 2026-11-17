@@ -77,22 +77,11 @@ export function Skeleton({
 
 export function MiniBarChart({
     data = [],
-    bar1Color = "#93c5fd",
-    bar2Color = "#3b82f6",
-    activeColor,
-    inactiveColor,
-    zeroColor,
+    activeColor = "#731124",
+    inactiveColor = "#f4d7dd",
+    zeroColor = "#eee7de",
 }: {
-    data?: {
-        label: string;
-        value: number;
-        value1?: number;
-        value2?: number;
-        students?: number;
-        employees?: number;
-    }[];
-    bar1Color?: string;
-    bar2Color?: string;
+    data?: { label: string; value: number }[];
     activeColor?: string;
     inactiveColor?: string;
     zeroColor?: string;
@@ -101,21 +90,13 @@ export function MiniBarChart({
         return null;
     }
 
-    const chartHeight = 38;
-    const barWidth = 4.5;
-    const barSpacing = 2; // gap between the two bars in the same month
-    const groupGap = 12; // gap between month groups
-    const groupWidth = barWidth * 2 + barSpacing;
+    const max = Math.max(...data.map((d) => d.value), 1);
+    const chartHeight = 44;
+    const barWidth = 8;
+    const gap = 16;
     const totalBars = data.length;
-    const totalHeight = chartHeight + 16;
-    const svgWidth = totalBars * (groupWidth + groupGap) - groupGap;
-
-    // Calculate max value across all items
-    const allVals = data.flatMap((d) => [
-        d.value1 ?? d.students ?? d.value,
-        d.value2 ?? d.employees ?? Math.max(0, Math.floor(d.value * 0.5)),
-    ]);
-    const max = Math.max(...allVals, 1);
+    const totalHeight = chartHeight + 18;
+    const svgWidth = totalBars * (barWidth + gap) - gap;
 
     return (
         <div className="flex flex-col items-center">
@@ -128,63 +109,52 @@ export function MiniBarChart({
             >
                 {data.map((item, index) => {
                     const isLast = index === data.length - 1;
-                    const val1 = item.value1 ?? item.students ?? (item.value > 0 ? item.value : 0);
-                    const val2 = item.value2 ?? item.employees ?? (item.value > 0 ? Math.max(1, Math.round(item.value * 0.5)) : 0);
+                    const hasVisits = item.value > 0;
+                    
+                    // Height calculation:
+                    const rawHeight = hasVisits ? (item.value / max) * chartHeight : 6;
+                    const clampedH = Math.min(Math.max(rawHeight, hasVisits ? 12 : 6), chartHeight);
+                    const x = index * (barWidth + gap);
+                    const y = chartHeight - clampedH;
+                    const centerX = x + barWidth / 2;
 
-                    const has1 = val1 > 0;
-                    const has2 = val2 > 0;
-
-                    const h1 = has1 ? Math.min(chartHeight, Math.max(8, (val1 / max) * chartHeight)) : 4;
-                    const h2 = has2 ? Math.min(chartHeight, Math.max(8, (val2 / max) * chartHeight)) : 4;
-
-                    const groupX = index * (groupWidth + groupGap);
-                    const x1 = groupX;
-                    const x2 = groupX + barWidth + barSpacing;
-
-                    const y1 = chartHeight - h1;
-                    const y2 = chartHeight - h2;
-                    const centerX = groupX + groupWidth / 2;
+                    // Bar color:
+                    let fillColor = zeroColor;
+                    if (isLast) {
+                        fillColor = activeColor;
+                    } else if (hasVisits) {
+                        fillColor = activeColor;
+                    } else {
+                        fillColor = inactiveColor;
+                    }
 
                     return (
                         <g key={item.label || index}>
-                            {/* Bar 1 (Desktop / Students) - Light Blue */}
+                            {/* Bar pill */}
                             <rect
-                                x={x1}
-                                y={y1}
+                                x={x}
+                                y={y}
                                 width={barWidth}
-                                height={h1}
-                                rx={2.5}
-                                ry={2.5}
-                                fill={has1 || isLast ? bar1Color : "#e2e8f0"}
-                                opacity={!has1 && !isLast ? 0.6 : 1}
-                                className="transition-all duration-300"
+                                height={clampedH}
+                                rx={4}
+                                ry={4}
+                                fill={fillColor}
+                                opacity={!hasVisits && !isLast ? 0.45 : 1}
+                                className={isLast || hasVisits ? "tcc-bar-active" : "tcc-bar-inactive"}
                             />
 
-                            {/* Bar 2 (Mobile / Employees) - Royal Blue */}
-                            <rect
-                                x={x2}
-                                y={y2}
-                                width={barWidth}
-                                height={h2}
-                                rx={2.5}
-                                ry={2.5}
-                                fill={has2 || isLast ? bar2Color : "#cbd5e1"}
-                                opacity={!has2 && !isLast ? 0.6 : 1}
-                                className="transition-all duration-300"
-                            />
-
-                            {/* Month text label centered under the multiple bar pair */}
+                            {/* Month text label perfectly centered under its bar */}
                             <text
                                 x={centerX}
-                                y={chartHeight + 13}
+                                y={chartHeight + 14}
                                 textAnchor="middle"
                                 fontSize="9"
-                                fontWeight={isLast || has1 || has2 ? "700" : "500"}
+                                fontWeight={hasVisits || isLast ? "700" : "500"}
                                 fill="currentColor"
                                 className={`select-none tracking-tight ${
-                                    isLast
-                                        ? "text-stone-900 font-bold dark:text-stone-200"
-                                        : "text-stone-400 font-medium dark:text-stone-500"
+                                    hasVisits || isLast
+                                        ? "text-[#731124] font-bold"
+                                        : "text-[#9c8e82] font-medium"
                                 }`}
                             >
                                 {item.label}
