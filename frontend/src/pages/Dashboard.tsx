@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { getCachedRecord, invalidateRecordCache, peekCachedRecord } from "../services/recordCache";
 import { getImageUrl, getLastMonths, isDateOnly, parseDate, toDateKey, visitDateKey } from "../utils/dashboard";
-import { Avatar, DonutChart, LineAreaChart, MiniBarChart, SectionHeader, Skeleton, StudentDetail } from "../components/dashboard/DashboardWidgets";
+import { Avatar, LineAreaChart, MiniBarChart, SectionHeader, Skeleton, StudentDetail } from "../components/dashboard/DashboardWidgets";
 import { InteractiveClinicVisitsChart } from "../components/dashboard/InteractiveClinicVisitsChart";
+import { VisitReasonsPieChart } from "../components/dashboard/VisitReasonsPieChart";
 import "./Dashboard.css";
 
 const DashboardAssistant = lazy(() =>
@@ -919,6 +920,14 @@ function Dashboard() {
     );
 
     const reasons = useMemo(() => {
+        if (Array.isArray(dashboard?.visit_reasons) && dashboard.visit_reasons.length > 0) {
+            return dashboard.visit_reasons.map((item: any, index: number) => ({
+                label: item.label,
+                value: Number(item.value || 0),
+                color: DONUT_COLORS[index % DONUT_COLORS.length],
+            }));
+        }
+
         const count: Record<string, number> = {};
 
         recentVisits.forEach((visit) => {
@@ -949,7 +958,7 @@ function Dashboard() {
                             DONUT_COLORS.length
                     ],
             }));
-    }, [recentVisits]);
+    }, [dashboard?.visit_reasons, recentVisits]);
 
     const reasonsTotal =
         reasons.reduce(
@@ -2228,85 +2237,12 @@ function Dashboard() {
                         loading={loading}
                     />
 
-                    <div className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-4">
-
-                        <SectionHeader
-                            icon={PieIcon}
-                            title="Visit Reasons"
-                            subtitle="Most common reasons in the latest visits"
-                        />
-
-                        {loading ? (
-                            <Skeleton className="h-[140px] w-full" />
-                        ) : reasons.length ? (
-                            <div className="flex items-center gap-4 sm:gap-5">
-
-                                <DonutChart
-                                    data={
-                                        reasons
-                                    }
-                                    total={
-                                        reasonsTotal
-                                    }
-                                    centerLabel="visits"
-                                    centerValue={
-                                        reasonsTotal
-                                    }
-                                    size={120}
-                                    strokeWidth={16}
-                                />
-
-                                <div className="flex-1 min-w-0 space-y-2.5">
-
-                                    {reasons.map(
-                                        (
-                                            item
-                                        ) => (
-                                            <div
-                                                key={
-                                                    item.label
-                                                }
-                                                className="flex items-center justify-between gap-2 min-w-0"
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0 flex-1">
-
-                                                    <span
-                                                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                                                        style={{
-                                                            backgroundColor:
-                                                                item.color,
-                                                        }}
-                                                    />
-
-                                                    <span
-                                                        className="truncate text-xs font-medium text-[#766959]"
-                                                        title={item.label}
-                                                    >
-                                                        {
-                                                            item.label
-                                                        }
-                                                    </span>
-                                                </div>
-
-                                                <span className="shrink-0 text-xs font-bold text-[#302820]">
-                                                    {Math.round(
-                                                        (item.value /
-                                                            reasonsTotal) *
-                                                            100
-                                                    )}
-                                                    %
-                                                </span>
-                                            </div>
-                                        )
-                                    )}
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="py-10 text-center text-sm text-[#a99d8f]">
-                                No visit reasons recorded yet.
-                            </p>
-                        )}
-                    </div>
+                    <VisitReasonsPieChart
+                        data={reasons}
+                        total={reasonsTotal}
+                        loading={loading}
+                        className="xl:col-span-4"
+                    />
 
                     <div className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-3">
 
