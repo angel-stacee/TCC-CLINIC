@@ -337,11 +337,13 @@ function MemberCard({
     isExpanded,
     onToggle,
     onEdit,
+    onDelete,
 }: {
     member: OrgMember;
     isExpanded: boolean;
     onToggle: () => void;
     onEdit?: (member: OrgMember) => void;
+    onDelete?: (id: string) => void;
 }): React.JSX.Element {
     const initials =
         (
@@ -473,6 +475,19 @@ function MemberCard({
                         >
                             <Pencil size={11} />
                             <span>Edit</span>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(member.id);
+                            }}
+                            className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 transition dark:text-rose-400 dark:hover:bg-rose-950/40"
+                        >
+                            <Trash2 size={11} />
+                            <span>Delete</span>
                         </button>
                     )}
                 </div>
@@ -1354,6 +1369,7 @@ export default function Organization(): React.JSX.Element {
                                                 isExpanded={!!expandedMembers[member.id]}
                                                 onToggle={() => toggleMember(member.id)}
                                                 onEdit={handleOpenEdit}
+                                                onDelete={handleDeleteMember}
                                             />
                                         ))}
                                     </div>
@@ -1371,6 +1387,7 @@ export default function Organization(): React.JSX.Element {
                             isExpanded={!!expandedMembers[member.id]}
                             onToggle={() => toggleMember(member.id)}
                             onEdit={handleOpenEdit}
+                            onDelete={handleDeleteMember}
                         />
                     ))}
                 </div>
