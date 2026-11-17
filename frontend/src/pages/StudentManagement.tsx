@@ -118,6 +118,31 @@ function StudentManagement() {
     const [search, setSearch] = useState(
         () => searchParams.get("search") || ""
     );
+    const [activeTab, setActiveTab] = useState<"students" | "staff" | "faculty">(() => {
+        const tabParam = searchParams.get("tab");
+        if (tabParam === "staff" || tabParam === "faculty") {
+            return tabParam;
+        }
+        const profileType = searchParams.get("profile_type");
+        if (profileType === "staff" || profileType === "faculty") {
+            return profileType;
+        }
+        return "students";
+    });
+
+    const handleTabChange = (tab: "students" | "staff" | "faculty") => {
+        setActiveTab(tab);
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            if (tab === "students") {
+                next.delete("tab");
+            } else {
+                next.set("tab", tab);
+            }
+            return next;
+        }, { replace: true });
+    };
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -131,7 +156,7 @@ function StudentManagement() {
     const hasActiveFilters = Boolean(
         search.trim() ||
         sexFilter !== "all" ||
-        courseFilter !== "all" ||
+        (activeTab === "students" && courseFilter !== "all") ||
         sortBy !== "name_asc"
     );
 
@@ -618,6 +643,7 @@ function StudentManagement() {
             setShowFacultyForm(false);
             setShowStaffForm(false);
             setShowStudentForm(true);
+            setActiveTab("students");
         } else if (category === "faculty") {
             const currentSource = showStudentForm ? studentForm : staffForm;
             setFacultyForm((prev) => ({
@@ -635,6 +661,7 @@ function StudentManagement() {
             setShowStudentForm(false);
             setShowStaffForm(false);
             setShowFacultyForm(true);
+            setActiveTab("faculty");
         } else if (category === "staff") {
             const currentSource = showStudentForm ? studentForm : facultyForm;
             setStaffForm((prev) => ({
@@ -652,6 +679,7 @@ function StudentManagement() {
             setShowStudentForm(false);
             setShowFacultyForm(false);
             setShowStaffForm(true);
+            setActiveTab("staff");
         }
     };
 
@@ -697,6 +725,10 @@ function StudentManagement() {
 
     useEffect(() => {
         const profileType = searchParams.get("profile_type");
+        if (profileType === "student") setActiveTab("students");
+        else if (profileType === "staff") setActiveTab("staff");
+        else if (profileType === "faculty") setActiveTab("faculty");
+
         const profileCode = searchParams.get("profile_code");
 
         const profileConfig = {
@@ -1479,7 +1511,13 @@ function StudentManagement() {
                         type="button"
                         onClick={() => {
                             setError("");
-                            openStudentForm();
+                            if (activeTab === "staff") {
+                                openStaffForm();
+                            } else if (activeTab === "faculty") {
+                                openFacultyForm();
+                            } else {
+                                openStudentForm();
+                            }
                         }}
                         className="inline-flex items-center gap-2 rounded-xl bg-[#8a6f50] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#735a40] focus:outline-none focus:ring-2 focus:ring-[#8a6f50]/40"
                     >
@@ -1487,6 +1525,92 @@ function StudentManagement() {
                     </button>
                 </div>
 
+                {/* Patient Category Tabs Navigation */}
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div
+                        role="tablist"
+                        aria-label="Patient categories"
+                        className="inline-flex w-full sm:w-auto p-1.5 rounded-2xl bg-[#f5efe6] border border-[#e8dfd4] dark:bg-[#251f19] dark:border-[#3d3226]"
+                    >
+                        <button
+                            type="button"
+                            role="tab"
+                            id="tab-students"
+                            aria-selected={activeTab === "students"}
+                            aria-controls="panel-students"
+                            onClick={() => handleTabChange("students")}
+                            className={`flex flex-1 sm:flex-initial items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all ${
+                                activeTab === "students"
+                                    ? "bg-[#70091f] text-white shadow-md shadow-[#70091f]/20 scale-[1.01]"
+                                    : "text-[#766959] hover:text-[#3d3329] hover:bg-white/70 dark:text-[#a99d8f] dark:hover:text-[#f8f3eb] dark:hover:bg-[#1f1914]"
+                            }`}
+                        >
+                            <GraduationCap size={17} className={activeTab === "students" ? "text-white" : "text-[#8a6f50] dark:text-[#c4b5a5]"} />
+                            <span>Students</span>
+                            <span
+                                className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                                    activeTab === "students"
+                                        ? "bg-white/20 text-white"
+                                        : "bg-[#e8dfd4] text-[#5c4e3f] dark:bg-[#382f25] dark:text-[#d3bca2]"
+                                }`}
+                            >
+                                {studentPagination.total}
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            role="tab"
+                            id="tab-staff"
+                            aria-selected={activeTab === "staff"}
+                            aria-controls="panel-staff"
+                            onClick={() => handleTabChange("staff")}
+                            className={`flex flex-1 sm:flex-initial items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all ${
+                                activeTab === "staff"
+                                    ? "bg-[#70091f] text-white shadow-md shadow-[#70091f]/20 scale-[1.01]"
+                                    : "text-[#766959] hover:text-[#3d3329] hover:bg-white/70 dark:text-[#a99d8f] dark:hover:text-[#f8f3eb] dark:hover:bg-[#1f1914]"
+                            }`}
+                        >
+                            <Briefcase size={17} className={activeTab === "staff" ? "text-white" : "text-[#8a6f50] dark:text-[#c4b5a5]"} />
+                            <span>Staff</span>
+                            <span
+                                className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                                    activeTab === "staff"
+                                        ? "bg-white/20 text-white"
+                                        : "bg-[#e8dfd4] text-[#5c4e3f] dark:bg-[#382f25] dark:text-[#d3bca2]"
+                                }`}
+                            >
+                                {staffPagination.total}
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            role="tab"
+                            id="tab-faculty"
+                            aria-selected={activeTab === "faculty"}
+                            aria-controls="panel-faculty"
+                            onClick={() => handleTabChange("faculty")}
+                            className={`flex flex-1 sm:flex-initial items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all ${
+                                activeTab === "faculty"
+                                    ? "bg-[#70091f] text-white shadow-md shadow-[#70091f]/20 scale-[1.01]"
+                                    : "text-[#766959] hover:text-[#3d3329] hover:bg-white/70 dark:text-[#a99d8f] dark:hover:text-[#f8f3eb] dark:hover:bg-[#1f1914]"
+                            }`}
+                        >
+                            <BookOpen size={17} className={activeTab === "faculty" ? "text-white" : "text-[#8a6f50] dark:text-[#c4b5a5]"} />
+                            <span>Faculty</span>
+                            <span
+                                className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                                    activeTab === "faculty"
+                                        ? "bg-white/20 text-white"
+                                        : "bg-[#e8dfd4] text-[#5c4e3f] dark:bg-[#382f25] dark:text-[#d3bca2]"
+                                }`}
+                            >
+                                {facultyPagination.total}
+                            </span>
+                        </button>
+                    </div>
+                </div>
 
                 {error && (
                     <div className="mb-5 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -1502,12 +1626,11 @@ function StudentManagement() {
                     </div>
                 )}
 
-
                 <div className="mb-6 rounded-2xl border border-[#e8dfd4] bg-white p-4 shadow-sm sm:p-5 dark:border-[#4e4234] dark:bg-[#211c17]">
                     {/* Search and Filters Controls */}
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-12">
                         {/* Search Input */}
-                        <div className="relative sm:col-span-2 md:col-span-5">
+                        <div className={`relative sm:col-span-2 ${activeTab === "students" ? "md:col-span-5" : "md:col-span-7"}`}>
                             <label htmlFor="patient-search" className="sr-only">
                                 Search patients by name, ID, course, or department
                             </label>
@@ -1521,7 +1644,13 @@ function StudentManagement() {
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search by name, ID, course, or department..."
+                                placeholder={
+                                    activeTab === "students"
+                                        ? "Search students by name, ID, course..."
+                                        : activeTab === "staff"
+                                        ? "Search staff by name, ID, position, department..."
+                                        : "Search faculty by name, ID, position, department..."
+                                }
                                 autoComplete="off"
                                 className="w-full rounded-xl border border-[#e8dfd4] bg-[#fcfaf6] py-2.5 pl-10 pr-10 text-sm text-[#3d3329] outline-none transition placeholder:text-[#a99d8f] focus:border-[#8a6f50] focus:bg-white focus:ring-4 focus:ring-[#8a6f50]/10 dark:border-[#4e4234] dark:bg-[#261f19] dark:text-[#f8f3eb] dark:placeholder:text-[#887d70] dark:focus:border-[#8a6f50] dark:focus:bg-[#211c17]"
                             />
@@ -1555,29 +1684,31 @@ function StudentManagement() {
                             </select>
                         </div>
 
-                        {/* Course Filter */}
-                        <div className="md:col-span-3">
-                            <label htmlFor="course-filter" className="sr-only">
-                                Filter by Course
-                            </label>
-                            <select
-                                id="course-filter"
-                                value={courseFilter}
-                                onChange={(e) => setCourseFilter(e.target.value)}
-                                aria-label="Filter by Course"
-                                className="w-full rounded-xl border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-2.5 text-sm font-medium text-[#3d3329] outline-none transition focus:border-[#8a6f50] focus:bg-white focus:ring-4 focus:ring-[#8a6f50]/10 dark:border-[#4e4234] dark:bg-[#261f19] dark:text-[#f8f3eb] dark:focus:border-[#8a6f50] dark:focus:bg-[#211c17]"
-                            >
-                                <option value="all">All Courses</option>
-                                {COURSES.map((course) => (
-                                    <option key={course} value={course}>
-                                        {course}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        {/* Course Filter - only relevant for Students */}
+                        {activeTab === "students" && (
+                            <div className="md:col-span-3">
+                                <label htmlFor="course-filter" className="sr-only">
+                                    Filter by Course
+                                </label>
+                                <select
+                                    id="course-filter"
+                                    value={courseFilter}
+                                    onChange={(e) => setCourseFilter(e.target.value)}
+                                    aria-label="Filter by Course"
+                                    className="w-full rounded-xl border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-2.5 text-sm font-medium text-[#3d3329] outline-none transition focus:border-[#8a6f50] focus:bg-white focus:ring-4 focus:ring-[#8a6f50]/10 dark:border-[#4e4234] dark:bg-[#261f19] dark:text-[#f8f3eb] dark:focus:border-[#8a6f50] dark:focus:bg-[#211c17]"
+                                >
+                                    <option value="all">All Courses</option>
+                                    {COURSES.map((course) => (
+                                        <option key={course} value={course}>
+                                            {course}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
                         {/* Sort Filter */}
-                        <div className="md:col-span-2">
+                        <div className={activeTab === "students" ? "md:col-span-2" : "md:col-span-3"}>
                             <label htmlFor="sort-filter" className="sr-only">
                                 Sort records
                             </label>
@@ -1625,7 +1756,7 @@ function StudentManagement() {
                                     </button>
                                 </span>
                             )}
-                            {courseFilter !== "all" && (
+                            {activeTab === "students" && courseFilter !== "all" && (
                                 <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#e8dfd4] bg-[#f3ebdf] px-2.5 py-1 font-medium text-[#6d5942] dark:border-[#4e4234] dark:bg-[#382f25] dark:text-[#e5dcd1]">
                                     Course: {courseFilter}
                                     <button
@@ -1669,11 +1800,14 @@ function StudentManagement() {
                     </div>
                 ) : (
                     <>
-
-
-
-
-                        <div className="mb-8 overflow-hidden rounded-xl border border-[#e8dfd4] bg-white shadow-sm dark:border-[#4e4234] dark:bg-[#211c17]">
+                        {/* Students Tab Panel */}
+                        {activeTab === "students" && (
+                            <div
+                                role="tabpanel"
+                                id="panel-students"
+                                aria-labelledby="tab-students"
+                                className="mb-8 overflow-hidden rounded-xl border border-[#e8dfd4] bg-white shadow-sm dark:border-[#4e4234] dark:bg-[#211c17]"
+                            >
                                 <div className="border-b border-[#e8dfd4] bg-white px-5 py-4 dark:border-[#4e4234] dark:bg-[#211c17]">
                                     <h2 className="font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
                                         Students
@@ -1686,168 +1820,176 @@ function StudentManagement() {
                                     </p>
                                 </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[900px] table-fixed text-left text-sm">
-                                    <colgroup>
-                                        <col style={{ width: "15%" }} />
-                                        <col style={{ width: "25%" }} />
-                                        <col style={{ width: "12%" }} />
-                                        <col style={{ width: "14%" }} />
-                                        <col style={{ width: "12%" }} />
-                                        <col style={{ width: "22%" }} />
-                                    </colgroup>
-                                    <thead className="border-b border-[#e8dfd4] bg-[#fcfaf6] text-xs font-bold uppercase tracking-wider text-[#887d70] dark:border-[#4e4234] dark:bg-[#29231d] dark:text-[#c4b5a5]">
-                                        <tr>
-                                            <th className="px-5 py-3.5">
-                                                Student ID
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Name
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Course
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Year Level
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Sex
-                                            </th>
-
-                                            <th className="px-5 py-3.5 text-right">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody className="divide-y divide-[#eee7de] dark:divide-[#382f25]">
-                                        {filteredStudents.length === 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full min-w-[900px] table-fixed text-left text-sm">
+                                        <colgroup>
+                                            <col style={{ width: "15%" }} />
+                                            <col style={{ width: "25%" }} />
+                                            <col style={{ width: "12%" }} />
+                                            <col style={{ width: "14%" }} />
+                                            <col style={{ width: "12%" }} />
+                                            <col style={{ width: "22%" }} />
+                                        </colgroup>
+                                        <thead className="border-b border-[#e8dfd4] bg-[#fcfaf6] text-xs font-bold uppercase tracking-wider text-[#887d70] dark:border-[#4e4234] dark:bg-[#29231d] dark:text-[#c4b5a5]">
                                             <tr>
-                                                <td
-                                                    colSpan={6}
-                                                    className="px-5 py-8 text-center text-[#887d70] dark:text-[#a99d8f]"
-                                                >
-                                                    No students found.
-                                                </td>
+                                                <th className="px-5 py-3.5">
+                                                    Student ID
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Name
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Course
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Year Level
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Sex
+                                                </th>
+
+                                                <th className="px-5 py-3.5 text-right">
+                                                    Actions
+                                                </th>
                                             </tr>
-                                        ) : (
-                                            filteredStudents.map(
-                                                (student) => (
-                                                    <tr
-                                                        key={student.id}
-                                                        className="align-middle transition-colors hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
+                                        </thead>
+
+                                        <tbody className="divide-y divide-[#eee7de] dark:divide-[#382f25]">
+                                            {filteredStudents.length === 0 ? (
+                                                <tr>
+                                                    <td
+                                                        colSpan={6}
+                                                        className="px-5 py-8 text-center text-[#887d70] dark:text-[#a99d8f]"
                                                     >
-                                                        <td className="px-5 py-4 font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
-                                                            {student.student_id}
-                                                        </td>
+                                                        No students found.
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                filteredStudents.map(
+                                                    (student) => (
+                                                        <tr
+                                                            key={student.id}
+                                                            className="align-middle transition-colors hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
+                                                        >
+                                                            <td className="px-5 py-4 font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
+                                                                {student.student_id}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#3d3329] dark:text-[#f8f3eb]">
-                                                            {getFullName(
-                                                                student
-                                                            )}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#3d3329] dark:text-[#f8f3eb]">
+                                                                {getFullName(
+                                                                    student
+                                                                )}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {student.course ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {student.course ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {student.year_level ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {student.year_level ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {student.sex ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {student.sex ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4">
-                                                            <div className="flex justify-end gap-2">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        viewStudentRecord(
-                                                                            student
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3 py-1.5 text-xs font-medium text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
-                                                                >
-                                                                    View
-                                                                </button>
+                                                            <td className="px-5 py-4">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            viewStudentRecord(
+                                                                                student
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3 py-1.5 text-xs font-medium text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
+                                                                    >
+                                                                        View
+                                                                    </button>
 
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        openStudentForm(
-                                                                            student
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60"
-                                                                >
-                                                                    Edit
-                                                                </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            openStudentForm(
+                                                                                student
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60"
+                                                                    >
+                                                                        Edit
+                                                                    </button>
 
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        deleteStudent(
-                                                                            student
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60"
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            deleteStudent(
+                                                                                student
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )
                                                 )
-                                            )
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div className="flex flex-col gap-3 border-t border-[#e8dfd4] bg-white px-5 py-4 text-sm text-[#887d70] sm:flex-row sm:items-center sm:justify-between dark:border-[#4e4234] dark:bg-[#211c17] dark:text-[#a99d8f]">
-                                <span className="text-center sm:text-left">
-                                    Page {studentPagination.current_page} of {studentPagination.last_page}
-                                </span>
-                                <div className="flex justify-center gap-2 sm:justify-end">
-                                    <button
-                                        type="button"
-                                        disabled={studentPagination.current_page <= 1}
-                                        onClick={() =>
-                                            loadStudentPage(
-                                                studentPagination.current_page - 1,
-                                                search
-                                            )
-                                        }
-                                        className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
-                                    >
-                                        Previous
-                                    </button>
-                                    <button
-                                        type="button"
-                                        disabled={studentPagination.current_page >= studentPagination.last_page}
-                                        onClick={() =>
-                                            loadStudentPage(
-                                                studentPagination.current_page + 1,
-                                                search
-                                            )
-                                        }
-                                        className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
-                                    >
-                                        Next
-                                    </button>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="flex flex-col gap-3 border-t border-[#e8dfd4] bg-white px-5 py-4 text-sm text-[#887d70] sm:flex-row sm:items-center sm:justify-between dark:border-[#4e4234] dark:bg-[#211c17] dark:text-[#a99d8f]">
+                                    <span className="text-center sm:text-left">
+                                        Page {studentPagination.current_page} of {studentPagination.last_page}
+                                    </span>
+                                    <div className="flex justify-center gap-2 sm:justify-end">
+                                        <button
+                                            type="button"
+                                            disabled={studentPagination.current_page <= 1}
+                                            onClick={() =>
+                                                loadStudentPage(
+                                                    studentPagination.current_page - 1,
+                                                    search
+                                                )
+                                            }
+                                            className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
+                                        >
+                                            Previous
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={studentPagination.current_page >= studentPagination.last_page}
+                                            onClick={() =>
+                                                loadStudentPage(
+                                                    studentPagination.current_page + 1,
+                                                    search
+                                                )
+                                            }
+                                            className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
+                                        >
+                                            Next
+                                        </button>
                                     </div>
                                 </div>
                             </div>
+                        )}
 
-                            <div className="mb-8 overflow-hidden rounded-xl border border-[#e8dfd4] bg-white shadow-sm dark:border-[#4e4234] dark:bg-[#211c17]">
+                        {/* Staff Tab Panel */}
+                        {activeTab === "staff" && (
+                            <div
+                                role="tabpanel"
+                                id="panel-staff"
+                                aria-labelledby="tab-staff"
+                                className="mb-8 overflow-hidden rounded-xl border border-[#e8dfd4] bg-white shadow-sm dark:border-[#4e4234] dark:bg-[#211c17]"
+                            >
                                 <div className="border-b border-[#e8dfd4] bg-white px-5 py-4 dark:border-[#4e4234] dark:bg-[#211c17]">
                                     <h2 className="font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
                                         Staff
@@ -1860,142 +2002,150 @@ function StudentManagement() {
                                     </p>
                                 </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[900px] table-fixed text-left text-sm">
-                                    <colgroup>
-                                        <col style={{ width: "15%" }} />
-                                        <col style={{ width: "25%" }} />
-                                        <col style={{ width: "12%" }} />
-                                        <col style={{ width: "14%" }} />
-                                        <col style={{ width: "12%" }} />
-                                        <col style={{ width: "22%" }} />
-                                    </colgroup>
-                                    <thead className="border-b border-[#e8dfd4] bg-[#fcfaf6] text-xs font-bold uppercase tracking-wider text-[#887d70] dark:border-[#4e4234] dark:bg-[#29231d] dark:text-[#c4b5a5]">
-                                        <tr>
-                                            <th className="px-5 py-3.5">
-                                                Staff ID
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Name
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Position
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Department
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Sex
-                                            </th>
-
-                                            <th className="px-5 py-3.5 text-right">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody className="divide-y divide-[#eee7de] dark:divide-[#382f25]">
-                                        {filteredStaff.length === 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full min-w-[900px] table-fixed text-left text-sm">
+                                        <colgroup>
+                                            <col style={{ width: "15%" }} />
+                                            <col style={{ width: "25%" }} />
+                                            <col style={{ width: "12%" }} />
+                                            <col style={{ width: "14%" }} />
+                                            <col style={{ width: "12%" }} />
+                                            <col style={{ width: "22%" }} />
+                                        </colgroup>
+                                        <thead className="border-b border-[#e8dfd4] bg-[#fcfaf6] text-xs font-bold uppercase tracking-wider text-[#887d70] dark:border-[#4e4234] dark:bg-[#29231d] dark:text-[#c4b5a5]">
                                             <tr>
-                                                <td
-                                                    colSpan={6}
-                                                    className="px-5 py-8 text-center text-[#887d70] dark:text-[#a99d8f]"
-                                                >
-                                                    No staff found.
-                                                </td>
+                                                <th className="px-5 py-3.5">
+                                                    Staff ID
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Name
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Position
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Department
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Sex
+                                                </th>
+
+                                                <th className="px-5 py-3.5 text-right">
+                                                    Actions
+                                                </th>
                                             </tr>
-                                        ) : (
-                                            filteredStaff.map(
-                                                (person) => (
-                                                    <tr
-                                                        key={person.id}
-                                                        className="align-middle transition-colors hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
+                                        </thead>
+
+                                        <tbody className="divide-y divide-[#eee7de] dark:divide-[#382f25]">
+                                            {filteredStaff.length === 0 ? (
+                                                <tr>
+                                                    <td
+                                                        colSpan={6}
+                                                        className="px-5 py-8 text-center text-[#887d70] dark:text-[#a99d8f]"
                                                     >
-                                                        <td className="px-5 py-4 font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
-                                                            {person.staff_id}
-                                                        </td>
+                                                        No staff found.
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                filteredStaff.map(
+                                                    (person) => (
+                                                        <tr
+                                                            key={person.id}
+                                                            className="align-middle transition-colors hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
+                                                        >
+                                                            <td className="px-5 py-4 font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
+                                                                {person.staff_id}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#3d3329] dark:text-[#f8f3eb]">
-                                                            {getFullName(
-                                                                person
-                                                            )}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#3d3329] dark:text-[#f8f3eb]">
+                                                                {getFullName(
+                                                                    person
+                                                                )}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {person.position ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {person.position ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {person.department ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {person.department ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {person.sex ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {person.sex ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4">
-                                                            <div className="flex justify-end gap-2">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        viewStaffRecord(
-                                                                            person
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3 py-1.5 text-xs font-medium text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
-                                                                >
-                                                                    View
-                                                                </button>
+                                                            <td className="px-5 py-4">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            viewStaffRecord(
+                                                                                person
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3 py-1.5 text-xs font-medium text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
+                                                                    >
+                                                                        View
+                                                                    </button>
 
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        openStaffForm(
-                                                                            person
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60"
-                                                                >
-                                                                    Edit
-                                                                </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            openStaffForm(
+                                                                                person
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60"
+                                                                    >
+                                                                        Edit
+                                                                    </button>
 
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        deleteStaff(
-                                                                            person
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60"
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            deleteStaff(
+                                                                                person
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )
                                                 )
-                                            )
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div className="flex flex-col gap-3 border-t border-[#e8dfd4] bg-white px-5 py-4 text-sm text-[#887d70] sm:flex-row sm:items-center sm:justify-between dark:border-[#4e4234] dark:bg-[#211c17] dark:text-[#a99d8f]">
-                                <span className="text-center sm:text-left">Page {staffPagination.current_page} of {staffPagination.last_page}</span>
-                                <div className="flex justify-center gap-2 sm:justify-end">
-                                    <button type="button" disabled={staffPagination.current_page <= 1} onClick={() => loadStaffPage(staffPagination.current_page - 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Previous</button>
-                                    <button type="button" disabled={staffPagination.current_page >= staffPagination.last_page} onClick={() => loadStaffPage(staffPagination.current_page + 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Next</button>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="flex flex-col gap-3 border-t border-[#e8dfd4] bg-white px-5 py-4 text-sm text-[#887d70] sm:flex-row sm:items-center sm:justify-between dark:border-[#4e4234] dark:bg-[#211c17] dark:text-[#a99d8f]">
+                                    <span className="text-center sm:text-left">Page {staffPagination.current_page} of {staffPagination.last_page}</span>
+                                    <div className="flex justify-center gap-2 sm:justify-end">
+                                        <button type="button" disabled={staffPagination.current_page <= 1} onClick={() => loadStaffPage(staffPagination.current_page - 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Previous</button>
+                                        <button type="button" disabled={staffPagination.current_page >= staffPagination.last_page} onClick={() => loadStaffPage(staffPagination.current_page + 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Next</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
-                        <div className="mb-8 overflow-hidden rounded-xl border border-[#e8dfd4] bg-white shadow-sm dark:border-[#4e4234] dark:bg-[#211c17]">
+                        {/* Faculty Tab Panel */}
+                        {activeTab === "faculty" && (
+                            <div
+                                role="tabpanel"
+                                id="panel-faculty"
+                                aria-labelledby="tab-faculty"
+                                className="mb-8 overflow-hidden rounded-xl border border-[#e8dfd4] bg-white shadow-sm dark:border-[#4e4234] dark:bg-[#211c17]"
+                            >
                                 <div className="border-b border-[#e8dfd4] bg-white px-5 py-4 dark:border-[#4e4234] dark:bg-[#211c17]">
                                     <h2 className="font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
                                         Faculty
@@ -2008,153 +2158,154 @@ function StudentManagement() {
                                     </p>
                                 </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[900px] table-fixed text-left text-sm">
-                                    <colgroup>
-                                        <col style={{ width: "15%" }} />
-                                        <col style={{ width: "25%" }} />
-                                        <col style={{ width: "12%" }} />
-                                        <col style={{ width: "14%" }} />
-                                        <col style={{ width: "12%" }} />
-                                        <col style={{ width: "22%" }} />
-                                    </colgroup>
-                                    <thead className="border-b border-[#e8dfd4] bg-[#fcfaf6] text-xs font-bold uppercase tracking-wider text-[#887d70] dark:border-[#4e4234] dark:bg-[#29231d] dark:text-[#c4b5a5]">
-                                        <tr>
-                                            <th className="px-5 py-3.5">
-                                                Employee ID
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Name
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Position
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Department
-                                            </th>
-
-                                            <th className="px-5 py-3.5">
-                                                Sex
-                                            </th>
-
-                                            <th className="px-5 py-3.5 text-right">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody className="divide-y divide-[#eee7de] dark:divide-[#382f25]">
-                                        {filteredFaculties.length === 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full min-w-[900px] table-fixed text-left text-sm">
+                                        <colgroup>
+                                            <col style={{ width: "15%" }} />
+                                            <col style={{ width: "25%" }} />
+                                            <col style={{ width: "12%" }} />
+                                            <col style={{ width: "14%" }} />
+                                            <col style={{ width: "12%" }} />
+                                            <col style={{ width: "22%" }} />
+                                        </colgroup>
+                                        <thead className="border-b border-[#e8dfd4] bg-[#fcfaf6] text-xs font-bold uppercase tracking-wider text-[#887d70] dark:border-[#4e4234] dark:bg-[#29231d] dark:text-[#c4b5a5]">
                                             <tr>
-                                                <td
-                                                    colSpan={6}
-                                                    className="px-5 py-8 text-center text-[#887d70] dark:text-[#a99d8f]"
-                                                >
-                                                    No faculty found.
-                                                </td>
+                                                <th className="px-5 py-3.5">
+                                                    Employee ID
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Name
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Position
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Department
+                                                </th>
+
+                                                <th className="px-5 py-3.5">
+                                                    Sex
+                                                </th>
+
+                                                <th className="px-5 py-3.5 text-right">
+                                                    Actions
+                                                </th>
                                             </tr>
-                                        ) : (
-                                            filteredFaculties.map(
-                                                (faculty) => (
-                                                    <tr
-                                                        key={faculty.id}
-                                                        className="align-middle transition-colors hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
+                                        </thead>
+
+                                        <tbody className="divide-y divide-[#eee7de] dark:divide-[#382f25]">
+                                            {filteredFaculties.length === 0 ? (
+                                                <tr>
+                                                    <td
+                                                        colSpan={6}
+                                                        className="px-5 py-8 text-center text-[#887d70] dark:text-[#a99d8f]"
                                                     >
-                                                        <td className="px-5 py-4 font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
-                                                            {
-                                                                faculty.employee_id
-                                                            }
-                                                        </td>
+                                                        No faculty found.
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                filteredFaculties.map(
+                                                    (faculty) => (
+                                                        <tr
+                                                            key={faculty.id}
+                                                            className="align-middle transition-colors hover:bg-[#fcfaf6] dark:hover:bg-[#2a221a]"
+                                                        >
+                                                            <td className="px-5 py-4 font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
+                                                                {
+                                                                    faculty.employee_id
+                                                                }
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#3d3329] dark:text-[#f8f3eb]">
-                                                            {getFullName(
-                                                                faculty
-                                                            )}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#3d3329] dark:text-[#f8f3eb]">
+                                                                {getFullName(
+                                                                    faculty
+                                                                )}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {faculty.position ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {faculty.position ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {faculty.department ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {faculty.department ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
-                                                            {faculty.sex ||
-                                                                "-"}
-                                                        </td>
+                                                            <td className="px-5 py-4 text-[#766959] dark:text-[#c4b5a5]">
+                                                                {faculty.sex ||
+                                                                    "-"}
+                                                            </td>
 
-                                                        <td className="px-5 py-4">
-                                                            <div className="flex justify-end gap-2">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        viewFacultyRecord(
-                                                                            faculty
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3 py-1.5 text-xs font-medium text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
-                                                                >
-                                                                    View
-                                                                </button>
+                                                            <td className="px-5 py-4">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            viewFacultyRecord(
+                                                                                faculty
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3 py-1.5 text-xs font-medium text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]"
+                                                                    >
+                                                                        View
+                                                                    </button>
 
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        openFacultyForm(
-                                                                            faculty
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60"
-                                                                >
-                                                                    Edit
-                                                                </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            openFacultyForm(
+                                                                                faculty
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60"
+                                                                    >
+                                                                        Edit
+                                                                    </button>
 
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        deleteFaculty(
-                                                                            faculty
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60"
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            deleteFaculty(
+                                                                                faculty
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )
                                                 )
-                                            )
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div className="flex flex-col gap-3 border-t border-[#e8dfd4] bg-white px-5 py-4 text-sm text-[#887d70] sm:flex-row sm:items-center sm:justify-between dark:border-[#4e4234] dark:bg-[#211c17] dark:text-[#a99d8f]">
-                                <span className="text-center sm:text-left">Page {facultyPagination.current_page} of {facultyPagination.last_page}</span>
-                                <div className="flex justify-center gap-2 sm:justify-end">
-                                    <button type="button" disabled={facultyPagination.current_page <= 1} onClick={() => loadFacultyPage(facultyPagination.current_page - 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Previous</button>
-                                    <button type="button" disabled={facultyPagination.current_page >= facultyPagination.last_page} onClick={() => loadFacultyPage(facultyPagination.current_page + 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Next</button>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="flex flex-col gap-3 border-t border-[#e8dfd4] bg-white px-5 py-4 text-sm text-[#887d70] sm:flex-row sm:items-center sm:justify-between dark:border-[#4e4234] dark:bg-[#211c17] dark:text-[#a99d8f]">
+                                    <span className="text-center sm:text-left">Page {facultyPagination.current_page} of {facultyPagination.last_page}</span>
+                                    <div className="flex justify-center gap-2 sm:justify-end">
+                                        <button type="button" disabled={facultyPagination.current_page <= 1} onClick={() => loadFacultyPage(facultyPagination.current_page - 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Previous</button>
+                                        <button type="button" disabled={facultyPagination.current_page >= facultyPagination.last_page} onClick={() => loadFacultyPage(facultyPagination.current_page + 1, search)} className="rounded-lg border border-[#e8dfd4] bg-[#fcfaf6] px-3.5 py-1.5 text-xs font-semibold text-[#766959] transition hover:bg-[#f3ebdf] hover:text-[#3d3329] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#4e4234] dark:bg-[#2c231a] dark:text-[#e5dcd1] dark:hover:bg-[#382f25]">Next</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         {hasActiveFilters &&
-                            filteredStudents.length === 0 &&
-                            filteredStaff.length === 0 &&
-                            filteredFaculties.length === 0 && (
+                            ((activeTab === "students" && filteredStudents.length === 0) ||
+                                (activeTab === "staff" && filteredStaff.length === 0) ||
+                                (activeTab === "faculty" && filteredFaculties.length === 0)) && (
                                 <div className="mb-8 rounded-2xl border border-[#e8dfd4] bg-[#fcfaf6] p-10 text-center dark:border-[#4e4234] dark:bg-[#211c17]">
                                     <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f3ebdf] text-[#8a6f50] dark:bg-[#382f25] dark:text-[#d3bca2]">
                                         <Search size={22} />
                                     </div>
                                     <h3 className="text-base font-semibold text-[#3d3329] dark:text-[#f8f3eb]">
-                                        No matching patient records found
+                                        No matching {activeTab === "students" ? "student" : activeTab === "staff" ? "staff" : "faculty"} records found
                                     </h3>
                                     <p className="mx-auto mt-1 max-w-sm text-sm text-[#887d70] dark:text-[#a99d8f]">
                                         No results match your active search and filter criteria. Try adjusting your query or resetting filters.
