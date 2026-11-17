@@ -94,8 +94,8 @@ export const ORG_DATA: Record<
                 location: "Baluarte Campus Clinic · Triage Station",
                 dutyHours: "Mon - Fri · 7:30 AM - 4:30 PM",
                 status: "Active Duty",
-                avatarBg: "bg-[#8b1505]",
-                badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "c-1",
                 responsibilities: [
                     "Coordinates day-to-day clinic visits and patient intake",
@@ -115,8 +115,8 @@ export const ORG_DATA: Record<
                 location: "Baluarte Campus Clinic · Bed Ward 1",
                 dutyHours: "Mon - Fri · 8:00 AM - 5:00 PM",
                 status: "Active Duty",
-                avatarBg: "bg-[#5c0819]",
-                badgeColor: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "c-2",
                 responsibilities: [
                     "First aid treatment and wound dressing",
@@ -136,8 +136,8 @@ export const ORG_DATA: Record<
                 location: "Baluarte Campus Clinic · Examination Room",
                 dutyHours: "Mon - Fri · 8:00 AM - 5:00 PM",
                 status: "Active Duty",
-                avatarBg: "bg-[#a31a08]",
-                badgeColor: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "c-2",
                 responsibilities: [
                     "Maternal and reproductive health counseling",
@@ -158,7 +158,7 @@ export const ORG_DATA: Record<
                 dutyHours: "Mon - Fri · 8:00 AM - 5:00 PM",
                 status: "On Call",
                 avatarBg: "bg-[#70091f]",
-                badgeColor: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "c-2",
                 responsibilities: [
                     "Emergency trauma response on campus grounds",
@@ -178,8 +178,8 @@ export const ORG_DATA: Record<
                 location: "Baluarte Campus Clinic · Pharmacy Room",
                 dutyHours: "Mon - Fri · 8:30 AM - 4:30 PM",
                 status: "Active Duty",
-                avatarBg: "bg-[#480613]",
-                badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "c-2",
                 responsibilities: [
                     "Medicine stock tracking, expiration audits & re-ordering",
@@ -199,8 +199,8 @@ export const ORG_DATA: Record<
                 location: "Baluarte Campus Clinic · Archive Section",
                 dutyHours: "Mon - Fri · 8:00 AM - 5:00 PM",
                 status: "In Clinic",
-                avatarBg: "bg-[#2e030c]",
-                badgeColor: "bg-stone-50 text-stone-700 border-stone-200 dark:bg-stone-900 dark:text-stone-300 dark:border-stone-700",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "c-2",
                 responsibilities: [
                     "Maintenance of student digital and physical health folders",
@@ -247,8 +247,8 @@ export const ORG_DATA: Record<
                 location: "TCC Administration Building · 2nd Floor",
                 dutyHours: "Mon - Fri · 8:00 AM - 5:00 PM",
                 status: "Administrative",
-                avatarBg: "bg-[#8b1505]",
-                badgeColor: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "a-1",
                 responsibilities: [
                     "Academic integration of campus healthcare programs",
@@ -268,8 +268,8 @@ export const ORG_DATA: Record<
                 location: "Health Sciences Building · Dean's Office",
                 dutyHours: "Mon - Fri · 8:00 AM - 5:00 PM",
                 status: "Active Duty",
-                avatarBg: "bg-[#5c0819]",
-                badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "a-2",
                 responsibilities: [
                     "Supervision of nursing & midwifery clinical affiliations",
@@ -289,8 +289,8 @@ export const ORG_DATA: Record<
                 location: "Student Center · Room 204",
                 dutyHours: "Mon - Fri · 8:00 AM - 5:00 PM",
                 status: "Administrative",
-                avatarBg: "bg-[#480613]",
-                badgeColor: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+                avatarBg: "bg-[#70091f]",
+                badgeColor: "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]",
                 reportsTo: "a-1",
                 responsibilities: [
                     "Student welfare and emergency crisis assistance",
@@ -305,33 +305,12 @@ export const ORG_DATA: Record<
 /* ─── Helpers & Storage ─────────────────────────────────────────────────── */
 const STORAGE_KEY = "tcc_organization_data_v1";
 
-export function getBadgeColorForStatus(status: OrgMember["status"]): string {
-    switch (status) {
-        case "Active Duty":
-            return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800";
-        case "In Clinic":
-            return "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]";
-        case "On Call":
-            return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800";
-        case "Administrative":
-            return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800";
-        default:
-            return "bg-stone-50 text-stone-700 border-stone-200";
-    }
+export function getBadgeColorForStatus(_status: OrgMember["status"]): string {
+    return "bg-[#70091f]/10 text-[#70091f] border-[#70091f]/30 dark:bg-[#70091f]/30 dark:text-[#fcebe7]";
 }
 
-export function getAvatarBgForLevel(level: number): string {
-    switch (level) {
-        case 1:
-            return "bg-[#70091f]";
-        case 2:
-            return "bg-[#8b1505]";
-        case 3:
-            return "bg-[#9c182f]";
-        case 4:
-        default:
-            return "bg-[#5c0819]";
-    }
+export function getAvatarBgForLevel(_level: number): string {
+    return "bg-[#70091f]";
 }
 
 export function loadStoredOrgData(): typeof ORG_DATA {
@@ -390,10 +369,7 @@ function MemberCard({
             <div className="flex items-start gap-3.5">
                 {/* Avatar with initials and level badge */}
                 <div
-                    className={[
-                        "relative flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl text-white font-bold text-base shadow-md ring-2 ring-white/50 dark:ring-black/40",
-                        member.avatarBg || "bg-[#70091f]",
-                    ].join(" ")}
+                    className="relative flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl text-white font-bold text-base shadow-md ring-2 ring-white/50 bg-[#70091f] dark:ring-black/40"
                 >
                     <span>{initials}</span>
                     <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#d4a017] text-[10px] font-extrabold text-[#140307] shadow ring-1 ring-white">
@@ -409,28 +385,11 @@ function MemberCard({
                         </h3>
                         <div className="flex items-center gap-1.5">
                             <span
-                                className={[
-                                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-                                    member.badgeColor,
-                                ].join(" ")}
+                                className="inline-flex items-center gap-1 rounded-full border border-[#70091f]/30 bg-[#70091f]/10 px-2 py-0.5 text-[10px] font-semibold text-[#70091f] dark:bg-[#70091f]/30 dark:text-[#fcebe7]"
                             >
                                 <span className="h-1.5 w-1.5 rounded-full bg-current" />
                                 {member.status}
                             </span>
-                            {onEdit && (
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onEdit(member);
-                                    }}
-                                    title="Edit personnel details"
-                                    className="flex h-6 w-6 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-500 shadow-xs transition hover:border-[#70091f]/50 hover:bg-[#fae1dc]/40 hover:text-[#70091f] active:scale-95 dark:bg-[#251f19] dark:border-[#382f25] dark:text-stone-400 dark:hover:text-[#f38a7c]"
-                                    aria-label={"Edit " + member.name}
-                                >
-                                    <Pencil size={12} />
-                                </button>
-                            )}
                         </div>
                     </div>
 
@@ -1183,7 +1142,7 @@ export default function Organization(): React.JSX.Element {
                             </p>
                         </div>
                         <div className="min-w-[110px] rounded-2xl border border-white/70 bg-white/90 px-5 py-3 text-center shadow-sm backdrop-blur-sm sm:min-w-[125px] sm:py-3.5 dark:border-[#44382c] dark:bg-[#251f19]/90">
-                            <p className="text-2xl font-extrabold tracking-tight text-[#d4a017] sm:text-3xl dark:text-[#fbc02d]">
+                            <p className="text-2xl font-extrabold tracking-tight text-[#70091f] sm:text-3xl dark:text-[#f38a7c]">
                                 {orgData.admin.members.length}
                             </p>
                             <p className="mt-1 text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
