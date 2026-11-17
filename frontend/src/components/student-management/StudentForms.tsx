@@ -10,22 +10,16 @@ export interface FacultyFormValues { employee_id: string; first_name: string; mi
 const COURSES = ["BSIT", "BSBA", "MidWifery", "BSHM", "BLIS", "BSED", "BSCRIM"];
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SECTIONS_BY_YEAR: Record<string, string[]> = {
-    "1st Year": ["1A", "1B", "1C", "1D", "Section A", "Section B", "Section C", "Section D"],
-    "2nd Year": ["2A", "2B", "2C", "2D", "Section A", "Section B", "Section C", "Section D"],
-    "3rd Year": ["3A", "3B", "3C", "3D", "Section A", "Section B", "Section C", "Section D"],
-    "4th Year": ["4A", "4B", "4C", "4D", "Section A", "Section B", "Section C", "Section D"],
+    "1st Year": ["1A", "1B", "1C", "1D"],
+    "2nd Year": ["2A", "2B", "2C", "2D"],
+    "3rd Year": ["3A", "3B", "3C", "3D"],
+    "4th Year": ["4A", "4B", "4C", "4D"],
 };
 const SECTIONS = [
     "1A", "1B", "1C", "1D",
     "2A", "2B", "2C", "2D",
     "3A", "3B", "3C", "3D",
     "4A", "4B", "4C", "4D",
-    "Section A",
-    "Section B",
-    "Section C",
-    "Section D",
-    "Section E",
-    "Section F",
 ];
 const SEX_OPTIONS = ["Male", "Female"];
 

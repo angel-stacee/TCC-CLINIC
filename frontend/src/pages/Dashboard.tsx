@@ -4,6 +4,7 @@ import api from "../services/api";
 import { getCachedRecord, invalidateRecordCache, peekCachedRecord } from "../services/recordCache";
 import { getImageUrl, getLastMonths, isDateOnly, parseDate, toDateKey, visitDateKey } from "../utils/dashboard";
 import { Avatar, DonutChart, LineAreaChart, MiniBarChart, SectionHeader, Skeleton, StudentDetail } from "../components/dashboard/DashboardWidgets";
+import { InteractiveClinicVisitsChart } from "../components/dashboard/InteractiveClinicVisitsChart";
 import "./Dashboard.css";
 
 const DashboardAssistant = lazy(() =>
@@ -2219,29 +2220,12 @@ function Dashboard() {
                     }
                 >
 
-                    <div className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-5">
-
-                        <SectionHeader
-                            icon={CalendarDays}
-                            title="Clinic Visits Overview"
-                            subtitle={
-                                isEstimated
-                                    ? "Based on the latest visits only"
-                                    : "Number of visits per month"
-                            }
-                        />
-
-                        {loading ? (
-                            <Skeleton className="h-[240px] w-full" />
-                        ) : (
-                            <LineAreaChart
-                                data={
-                                    visitsOverview
-                                }
-                                color={ACCENTS.cocoa.line}
-                            />
-                        )}
-                    </div>
+                    <InteractiveClinicVisitsChart
+                        visitTrends={dashboard?.visit_trends}
+                        recentVisits={recentVisits}
+                        monthlyVisits={dashboard?.monthly_visits}
+                        loading={loading}
+                    />
 
                     <div className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-4">
 
