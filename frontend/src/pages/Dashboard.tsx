@@ -6,7 +6,6 @@ import { getImageUrl, getLastMonths, isDateOnly, parseDate, toDateKey, visitDate
 import { Avatar, LineAreaChart, MiniBarChart, SectionHeader, Skeleton, StudentDetail } from "../components/dashboard/DashboardWidgets";
 import { InteractiveClinicVisitsChart } from "../components/dashboard/InteractiveClinicVisitsChart";
 import { VisitReasonsPieChart } from "../components/dashboard/VisitReasonsPieChart";
-import { ChartBarMultiple } from "../components/dashboard/ChartBarMultiple";
 import "./Dashboard.css";
 
 const DashboardAssistant = lazy(() =>
@@ -2242,14 +2241,93 @@ function Dashboard() {
                         data={reasons}
                         total={reasonsTotal}
                         loading={loading}
-                        className="xl:col-span-3"
-                    />
-
-                    <ChartBarMultiple
-                        monthlyVisits={dashboard?.monthly_visits}
-                        loading={loading}
                         className="xl:col-span-4"
                     />
+
+                    <div className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-3">
+
+                        <SectionHeader
+                            icon={Users}
+                            title="Gender Distribution"
+                            subtitle="Students, staff, and faculty by gender"
+                        />
+
+                        <div className="flex h-[170px] items-end justify-around border-b border-[#e8dfd4] px-6">
+
+                            {gender.map(
+                                (item) => {
+                                    const height =
+                                        (item.value /
+                                            maxGender) *
+                                        130;
+
+                                    return (
+                                        <div
+                                            key={
+                                                item.label
+                                            }
+                                            className="flex h-full flex-1 flex-col items-center justify-end"
+                                        >
+                                            <span className="mb-2 text-sm font-bold text-[#302820]">
+                                                {
+                                                    item.value
+                                                }
+                                            </span>
+
+                                            <div
+                                                className="w-12 rounded-t-lg transition-all duration-500"
+                                                aria-label={`${item.label}: ${item.value} registered patients`}
+                                                role="img"
+                                                style={{
+                                                    height: `${
+                                                        item.value > 0
+                                                            ? Math.max(
+                                                                  height,
+                                                                  15
+                                                              )
+                                                            : 0
+                                                    }px`,
+                                                    backgroundColor:
+                                                        item.color,
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                }
+                            )}
+                        </div>
+
+                        <div className="flex justify-around pt-3">
+
+                            {gender.map(
+                                (item) => (
+                                    <div
+                                        key={
+                                            item.label
+                                        }
+                                        className="flex-1 text-center"
+                                    >
+                                        <p className="text-xs font-semibold text-[#302820]">
+                                            {
+                                                item.label
+                                            }
+                                        </p>
+
+                                        <p className="mt-1 text-[11px] font-medium text-[#a99d8f]">
+                                            {totalGenderPatients
+                                                ? Math.round(
+                                                      (item.value /
+                                                          totalGenderPatients) *
+                                                          100
+                                                  )
+                                                : 0}
+                                            %
+                                        </p>
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    </div>
                 </section>
 
 
