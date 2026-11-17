@@ -1863,32 +1863,47 @@ function Dashboard() {
                     <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
                         <div className="text-left">
-                            <p className="text-sm font-semibold text-[#70091f]">
+                            <p className="text-sm font-semibold text-[#70091f] dark:text-[#f8a598]">
                                 {greeting}
                             </p>
 
-                            <h1 className="mt-1 text-[34px] font-bold leading-tight tracking-tight text-[#302820]">
+                            <h1 className="mt-1 text-[34px] font-bold leading-tight tracking-tight text-[#302820] dark:text-white">
                                 Welcome back,{" "}
                                 {firstName}!
                             </h1>
 
                             <div className="mt-2 flex flex-wrap items-center gap-2">
 
-                                <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-xs font-semibold text-[#70091f] ring-1 ring-white/70">
+                                <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-xs font-semibold text-[#70091f] ring-1 ring-white/70 dark:bg-[#70091f]/40 dark:text-[#fcebe7] dark:ring-[#70091f]/60">
                                     {formatRole(user?.role) ||
                                         "Clinic Staff"}
                                 </span>
 
-                                <span className="text-[15px] text-[#887d70]">
+                                <span className="text-[15px] text-[#887d70] dark:text-stone-300">
                                     Here's what's happening at the clinic.
                                 </span>
                             </div>
                         </div>
 
                         <div className="tcc-hero-date-card relative flex flex-wrap items-center gap-3 self-start rounded-2xl border border-[#e8dfd4] bg-white p-3 shadow-md transition-all dark:border-[#4e4234] dark:!bg-[#211c17] lg:self-auto">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fcebe7] text-[#70091f] dark:!bg-[#382d21] dark:!text-[#e1ccb0]">
+                            {/* Interactive Calendar Date Picker Icon */}
+                            <label
+                                className="relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-[#fcebe7] text-[#70091f] transition-all hover:bg-[#f8d7d0] hover:scale-105 active:scale-95 dark:!bg-[#382d21] dark:!text-[#e1ccb0]"
+                                title="Click to pick a date"
+                            >
                                 <CalendarDays size={20} strokeWidth={2.2} />
-                            </div>
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(event) => {
+                                        if (event.target.value) {
+                                            setSelectedDate(event.target.value);
+                                        }
+                                    }}
+                                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                                    aria-label="Pick date"
+                                />
+                            </label>
 
                             <div className="pr-1 text-left">
                                 <p className="text-sm font-bold text-[#1e1b18] dark:!text-[#f8f3eb]">
@@ -1916,22 +1931,6 @@ function Dashboard() {
                                     </span>
                                 </p>
                             </div>
-
-                            {/* Clean custom calendar picker trigger icon */}
-                            <label className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#e8dfd4] bg-[#faf6ef] text-[#70091f] transition-colors hover:bg-[#fcebe7] dark:border-[#4e4234] dark:!bg-[#342a22] dark:!text-[#e1ccb0] dark:hover:!bg-[#44382c]" title="Pick a date">
-                                <CalendarDays size={16} />
-                                <input
-                                    type="date"
-                                    value={selectedDate}
-                                    onChange={(event) => {
-                                        if (event.target.value) {
-                                            setSelectedDate(event.target.value);
-                                        }
-                                    }}
-                                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                                    aria-label="Pick a date"
-                                />
-                            </label>
 
                             {!isToday && (
                                 <button

@@ -642,17 +642,18 @@ html.tcc-dark header.fixed [class~="text-[#8a6f50]"] {
 }
 
 html.tcc-dark .tcc-hero-banner {
-    background: linear-gradient(110deg, #2e261e, #3a2e22) !important;
+    background: linear-gradient(110deg, #2b1117, #1c0a0f) !important;
+    border-color: #521622 !important;
 }
 
 html.tcc-dark .tcc-hero-date-card {
-    background-color: #211c17 !important;
-    border-color: #4e4234 !important;
+    background-color: #221417 !important;
+    border-color: #481e26 !important;
 }
 
 html.tcc-dark .tcc-module-header {
-    background: linear-gradient(110deg, #2e261e, #382d21) !important;
-    border-color: #4e4234 !important;
+    background: linear-gradient(110deg, #2b1117, #1c0a0f) !important;
+    border-color: #521622 !important;
 }
 
 html.tcc-dark .tcc-module-page section[class~="rounded-2xl"][class~="border"]:hover {
