@@ -739,29 +739,29 @@ function Medicine() {
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-red-200 bg-[#fff8f8] px-4 py-3.5 shadow-sm">
+                    <div className="rounded-xl border border-red-200 bg-[#fcfaf6] px-4 py-3.5 shadow-sm dark:bg-[#29231d] dark:border-red-900/40">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
                                     <AlertOctagon size={19} />
                                 </div>
 
                                 <div>
-                                    <p className="text-xs font-medium text-[#887d70]">
+                                    <p className="text-xs font-medium text-[#887d70] dark:text-stone-400">
                                         Expired
                                     </p>
 
-                                    <p className="mt-0.5 text-2xl font-bold text-red-600">
+                                    <p className="mt-0.5 text-2xl font-bold text-red-600 dark:text-red-400">
                                         {summary.expired_count || 0}
                                     </p>
 
-                                    <p className="mt-1 text-[10px] font-medium text-red-600">
+                                    <p className="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400">
                                         {summary.expiring_soon_count > 0 ? `+${summary.expiring_soon_count} expiring soon` : "Requires disposal"}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="flex h-12 items-end gap-1 text-red-600">
+                            <div className="flex h-12 items-end gap-1 text-red-600 dark:text-red-400">
                                 {createMiniBars([0.4, 0.6, 0.9, 1.0])}
                             </div>
                         </div>
