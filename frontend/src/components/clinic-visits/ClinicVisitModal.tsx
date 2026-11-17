@@ -46,6 +46,20 @@ const BLOOD_PRESSURE_OPTIONS = [
     { value: "90/60", label: "90/60 (Low BP / Hypotension)" },
 ];
 
+const REASON_OPTIONS = [
+    "Fever",
+    "Headache",
+    "Stomachache",
+    "Cough / Cold",
+    "Dizziness",
+    "Injury / Wound",
+    "Body Pain",
+    "Check-up",
+    "First Aid",
+    "Medication",
+    "Medical Concern",
+];
+
 const SYMPTOMS_OPTIONS = [
     "Fever / Chills",
     "Headache / Migraine",
@@ -368,30 +382,53 @@ export function ClinicVisitModal({
                             </label>
 
                             <select
-                                value={formData.reason}
-                                onChange={(event) =>
-                                    setFormData((previous: any) => ({
-                                        ...previous,
-                                        reason: event.target.value,
-                                    }))
+                                value={
+                                    customFields.reason
+                                        ? "__custom__"
+                                        : REASON_OPTIONS.includes(formData.reason)
+                                        ? formData.reason
+                                        : formData.reason
+                                        ? "__custom__"
+                                        : ""
                                 }
+                                onChange={(event) => {
+                                    const val = event.target.value;
+                                    if (val === "__custom__") {
+                                        setCustomFields((prev) => ({ ...prev, reason: true }));
+                                        setFormData((prev: any) => ({ ...prev, reason: "" }));
+                                    } else {
+                                        setCustomFields((prev) => ({ ...prev, reason: false }));
+                                        setFormData((prev: any) => ({ ...prev, reason: val }));
+                                    }
+                                }}
                                 className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
                                 required
                             >
                                 <option value="">Select Reason</option>
-                                <option value="Fever">Fever</option>
-                                <option value="Headache">Headache</option>
-                                <option value="Stomachache">Stomachache</option>
-                                <option value="Cough / Cold">Cough / Cold</option>
-                                <option value="Dizziness">Dizziness</option>
-                                <option value="Injury / Wound">Injury / Wound</option>
-                                <option value="Body Pain">Body Pain</option>
-                                <option value="Check-up">Check-up</option>
-                                <option value="First Aid">First Aid</option>
-                                <option value="Medication">Medication</option>
-                                <option value="Medical Concern">Medical Concern</option>
-                                <option value="Other">Other</option>
+                                {REASON_OPTIONS.map((opt) => (
+                                    <option key={opt} value={opt}>
+                                        {opt}
+                                    </option>
+                                ))}
+                                <option value="__custom__">Other (Type custom reason)</option>
                             </select>
+                            {(customFields.reason ||
+                                (!REASON_OPTIONS.includes(formData.reason) && formData.reason)) && (
+                                <input
+                                    type="text"
+                                    name="reason"
+                                    value={formData.reason}
+                                    onChange={(event) =>
+                                        setFormData((prev: any) => ({
+                                            ...prev,
+                                            reason: event.target.value,
+                                        }))
+                                    }
+                                    placeholder="Enter specific visit reason..."
+                                    className="mt-1 w-full rounded-lg border border-amber-300 bg-amber-50/50 px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+                                    required
+                                />
+                            )}
                         </div>
 
                         {/* 5. Temperature (Left) */}

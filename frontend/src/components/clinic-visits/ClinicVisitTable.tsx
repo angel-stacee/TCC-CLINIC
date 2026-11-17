@@ -5,6 +5,50 @@ export interface VisitRecord { id: number | string; visit_date?: string | null; 
 interface VisitPagination { current_page: number; last_page: number; total: number; per_page: number; }
 interface ClinicVisitTableProps { search: string; setSearch: (value: string) => void; loading: boolean; pageLoading: boolean; filteredVisits: VisitRecord[]; getPatientName: (visit: VisitRecord) => { name: string; id?: string; type?: string }; getNurseName: (nurse: any) => string; getMedicineName: (medicine: any) => string; getMedicineUnit: (medicine: any) => string; formatDate: (date: string | null | undefined) => string; handleEdit: (visit: VisitRecord) => void; deleteVisit: VisitRecord | null; setDeleteVisit: Dispatch<SetStateAction<VisitRecord | null>>; handleDelete: () => void; visitPagination: VisitPagination; fetchVisits: (page?: number, searchTerm?: string) => Promise<void>; }
 
+function renderReasonBadge(reason: string | null | undefined, symptoms?: string | null) {
+    if (!reason || reason === "-") {
+        return <span className="text-xs text-stone-400 italic">None</span>;
+    }
+
+    const r = reason.trim();
+    const lower = r.toLowerCase();
+
+    let colorStyle = "border-stone-200 bg-stone-100/90 text-stone-700 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300";
+
+    if (lower.includes("fever")) {
+        colorStyle = "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800/60 dark:bg-rose-950/50 dark:text-rose-300";
+    } else if (lower.includes("headache")) {
+        colorStyle = "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-300";
+    } else if (lower.includes("dizziness")) {
+        colorStyle = "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-950/50 dark:text-indigo-300";
+    } else if (lower.includes("stomach") || lower.includes("abdominal")) {
+        colorStyle = "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800/60 dark:bg-orange-950/50 dark:text-orange-300";
+    } else if (lower.includes("cough") || lower.includes("cold")) {
+        colorStyle = "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800/60 dark:bg-sky-950/50 dark:text-sky-300";
+    } else if (lower.includes("injury") || lower.includes("wound") || lower.includes("pain")) {
+        colorStyle = "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800/60 dark:bg-purple-950/50 dark:text-purple-300";
+    } else if (lower.includes("check-up") || lower.includes("first aid") || lower.includes("medication")) {
+        colorStyle = "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-300";
+    } else if (lower === "other") {
+        colorStyle = "border-[#ebdcd5] bg-[#fdf5f3] text-[#70091f] dark:border-[#521320] dark:bg-[#70091f]/25 dark:text-[#f8a598]";
+    }
+
+    const displayText = lower === "other" && symptoms ? `Other · ${symptoms}` : r;
+
+    return (
+        <div className="flex flex-col items-start gap-0.5">
+            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold shadow-2xs ${colorStyle}`}>
+                {displayText}
+            </span>
+            {lower !== "other" && symptoms && (
+                <span className="max-w-[180px] truncate text-[10px] text-stone-500 pl-1 dark:text-stone-400" title={symptoms}>
+                    {symptoms}
+                </span>
+            )}
+        </div>
+    );
+}
+
 export function ClinicVisitTable({ search, setSearch, loading, pageLoading, filteredVisits, getPatientName, getNurseName, getMedicineName, getMedicineUnit, formatDate, handleEdit, deleteVisit, setDeleteVisit, handleDelete, visitPagination, fetchVisits }: ClinicVisitTableProps) {
     return (
         <>
@@ -159,11 +203,8 @@ export function ClinicVisitTable({ search, setSearch, loading, pageLoading, filt
                                                     </td>
 
 
-                                                    <td className="max-w-[180px] px-5 py-3.5 text-xs text-[#766959]">
-                                                        <span className="line-clamp-2">
-                                                            {visit.reason ||
-                                                                "-"}
-                                                        </span>
+                                                    <td className="max-w-[200px] px-5 py-3.5">
+                                                        {renderReasonBadge(visit.reason, visit.symptoms)}
                                                     </td>
 
 
