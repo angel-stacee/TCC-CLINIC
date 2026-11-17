@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { getCachedRecord, invalidateRecordCache, peekCachedRecord } from "../services/recordCache";
 import { getImageUrl, getLastMonths, isDateOnly, parseDate, toDateKey, visitDateKey } from "../utils/dashboard";
-import { Avatar, DonutChart, LineAreaChart, MiniBarChart, QuickAction, SectionHeader, Skeleton, StudentDetail } from "../components/dashboard/DashboardWidgets";
+import { Avatar, DonutChart, LineAreaChart, MiniBarChart, SectionHeader, Skeleton, StudentDetail } from "../components/dashboard/DashboardWidgets";
 import "./Dashboard.css";
 
 const DashboardAssistant = lazy(() =>
@@ -19,7 +19,6 @@ import {
     Search,
     Bell,
     CalendarDays,
-    ClipboardList,
     UserPlus,
     Activity,
     ChevronLeft,
@@ -75,38 +74,6 @@ const DONUT_COLORS = [
     "#70091f",
     "#9e6b7d",
 ];
-
-const QUICK_ACTIONS = [
-    {
-        to: "/clinic-visits",
-        icon: Stethoscope,
-        title: "Log a clinic visit",
-        description: "Record a patient who came to the clinic",
-        primary: true,
-    },
-    {
-        to: "/students",
-        icon: UserPlus,
-        title: "Register a patient",
-        description: "Add a new patient profile",
-    },
-    {
-        to: "/clinic-visits",
-        icon: FileText,
-        title: "Clinic visit records",
-        description: "Review recorded visit details",
-    },
-    {
-        to: "/reports",
-        icon: ClipboardList,
-        title: "Reports",
-        description: "View clinic summaries",
-    },
-];
-
-
-
-
 
 const formatRole = (role) => {
     if (!role) return "Nurse";
@@ -2120,7 +2087,7 @@ function Dashboard() {
                     }
                 >
 
-                    <section className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-7">
+                    <section className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-12">
 
                         <SectionHeader
                             icon={Stethoscope}
@@ -2235,28 +2202,6 @@ function Dashboard() {
                         <p className="mt-4 border-t border-[#eee7de] pt-3 text-[11px] text-[#a99d8f]">
                             Based on the latest visits the dashboard loads. Open All visits for the full history.
                         </p>
-                    </section>
-
-                    <section className="rounded-2xl border border-[#e8dfd4] bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md xl:col-span-5">
-
-                        <SectionHeader
-                            icon={Activity}
-                            title="Quick actions"
-                            subtitle="Things you do most often"
-                        />
-
-                        <div className="space-y-2.5">
-                            {QUICK_ACTIONS.map(
-                                (action) => (
-                                    <QuickAction
-                                        key={
-                                            action.to
-                                        }
-                                        {...action}
-                                    />
-                                )
-                            )}
-                        </div>
                     </section>
                 </div>
 
