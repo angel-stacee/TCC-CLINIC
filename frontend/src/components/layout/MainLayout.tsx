@@ -32,8 +32,8 @@ function MainLayout({ children }: MainLayoutProps): React.JSX.Element {
     }, [sidebarOpen]);
 
     return (
-        <div className="min-h-screen bg-[#fcf8f8]">
-            <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center border-b border-[#70091f]/20 bg-white/95 px-4 shadow-sm backdrop-blur lg:hidden">
+        <div className="min-h-screen bg-[#fcf8f8] dark:bg-[#15120f] transition-colors duration-200">
+            <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center border-b border-[#70091f]/20 bg-white/95 px-4 shadow-sm backdrop-blur lg:hidden dark:bg-[#1a1412]/95 dark:border-[#382f25]">
                 <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="flex h-10 w-10 items-center justify-center rounded-lg text-[#70091f] transition duration-200 hover:scale-105 hover:bg-[#fcebe7] active:scale-95"

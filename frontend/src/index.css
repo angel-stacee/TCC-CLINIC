@@ -290,6 +290,8 @@ html.tcc-dark [class~="bg-white"]:not([class~="text-white"]),
 html.tcc-dark [class~="bg-stone-50"],
 html.tcc-dark [class~="bg-stone-100"],
 html.tcc-dark [class~="bg-[#f7f2eb]"],
+html.tcc-dark [class~="bg-[#fcf8f8]"],
+html.tcc-dark [class~="bg-[#fcf8f5]"],
 html.tcc-dark [class~="bg-[#fcfaf6]"] {
     background-color: #29231d !important;
 }
@@ -623,7 +625,9 @@ html.tcc-dark .tcc-module-page {
     color: #f8f3eb !important;
 }
 
-html.tcc-dark [class~="bg-[#f7f2eb]"] {
+html.tcc-dark [class~="bg-[#f7f2eb]"],
+html.tcc-dark [class~="bg-[#fcf8f8]"],
+html.tcc-dark [class~="bg-[#fcf8f5]"] {
     background-color: #171411 !important;
 }
 

@@ -2,6 +2,7 @@ import React from "react";
 import api from "../../services/api";
 import { invalidateRecordCache } from "../../services/recordCache";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import ThemeToggle from "../common/ThemeToggle";
 import {
     LayoutDashboard,
     Users,
@@ -231,6 +232,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): React.JSX.Eleme
             </nav>
 
             <div className="px-4 pb-5 space-y-3">
+                {/* Theme Mode Switcher */}
+                <ThemeToggle variant="sidebar" />
+
                 {/* Log Out Button */}
                 <button
                     type="button"

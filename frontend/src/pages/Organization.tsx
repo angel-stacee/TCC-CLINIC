@@ -361,7 +361,7 @@ function MemberCard({
     return (
         <div
             className={[
-                "group relative flex flex-col rounded-2xl border transition-all duration-300 bg-white p-5 shadow-sm dark:bg-[#201a14] dark:border-[#3d3328]",
+                "group relative flex flex-col rounded-2xl border transition-all duration-300 bg-white p-5 shadow-sm border-[#ebdcd5] dark:bg-[#201a14] dark:border-[#3d3328]",
                 isExpanded
                     ? "ring-2 ring-[#70091f] border-[#70091f] shadow-lg dark:ring-[#d4a017] dark:border-[#d4a017]"
                     : "hover:border-[#70091f]/40 hover:shadow-md dark:hover:border-[#d4a017]/40",
@@ -1310,7 +1310,7 @@ export default function Organization(): React.JSX.Element {
             </div>
 
             {/* ── ACTIVE CATEGORY BANNER ───────────────────────────────── */}
-            <div className="mb-6 rounded-xl border border-stone-200 bg-stone-50/80 px-4 py-3 text-left dark:bg-[#1f1914] dark:border-[#382f25]">
+            <div className="mb-6 rounded-xl border border-[#ebdcd5] bg-[#fdf8f5] px-4 py-3 text-left dark:bg-[#1f1914] dark:border-[#382f25]">
                 <p className="text-xs text-stone-600 dark:text-stone-300">
                     <span className="font-bold text-[#70091f] dark:text-[#f38a7c]">
                         {activeGroup.title}:
@@ -1340,7 +1340,7 @@ export default function Organization(): React.JSX.Element {
                                 <div key={level} className="relative">
                                     {/* Level separator & badge */}
                                     <div className="mb-4 flex items-center gap-3">
-                                        <div className="flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-1 shadow-sm dark:bg-[#251f19] dark:border-[#382f25]">
+                                        <div className="flex items-center gap-2 rounded-full border border-[#ebdcd5] bg-white px-3 py-1 shadow-sm dark:bg-[#251f19] dark:border-[#382f25]">
                                             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#70091f] text-[10px] font-bold text-white">
                                                 {level}
                                             </span>
