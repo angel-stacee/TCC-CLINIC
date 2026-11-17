@@ -16,10 +16,17 @@ export type TrendPoint = {
     employees: number;
 };
 
+export type VisitTotals = {
+    total?: number;
+    students?: number;
+    employees?: number;
+};
+
 interface InteractiveClinicVisitsChartProps {
     visitTrends?: TrendPoint[];
     recentVisits?: any[];
     monthlyVisits?: any[];
+    visitTotals?: VisitTotals;
     loading?: boolean;
 }
 
@@ -47,11 +54,12 @@ export function InteractiveClinicVisitsChart({
     visitTrends,
     recentVisits,
     monthlyVisits,
+    visitTotals,
     loading = false,
 }: InteractiveClinicVisitsChartProps) {
     const [activeChart, setActiveChart] = useState<ChartKey>("students");
 
-    // Build continuous daily sequence for chartData (past 60-90 days or matching visits)
+    // Build continuous daily sequence for chartData (past 60 days)
     const chartData = useMemo(() => {
         // Collect real date map
         const realMap: Record<string, { total: number; students: number; employees: number }> = {};
@@ -66,9 +74,7 @@ export function InteractiveClinicVisitsChart({
                     employees: Number(t.employees || 0),
                 };
             });
-        }
-
-        if (Array.isArray(recentVisits) && recentVisits.length > 0) {
+        } else if (Array.isArray(recentVisits) && recentVisits.length > 0) {
             recentVisits.forEach((v) => {
                 const rawDate = v.visit_date || v.created_at;
                 if (!rawDate) return;
@@ -85,6 +91,13 @@ export function InteractiveClinicVisitsChart({
             });
         }
 
+        const formatDateKey = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        };
+
         // Generate past 60 days
         const points: TrendPoint[] = [];
         const daysToGenerate = 60;
@@ -93,7 +106,7 @@ export function InteractiveClinicVisitsChart({
         for (let i = daysToGenerate - 1; i >= 0; i--) {
             const d = new Date(now);
             d.setDate(d.getDate() - i);
-            const dateStr = d.toISOString().slice(0, 10);
+            const dateStr = formatDateKey(d);
 
             if (realMap[dateStr]) {
                 points.push({
@@ -103,18 +116,11 @@ export function InteractiveClinicVisitsChart({
                     employees: realMap[dateStr].employees,
                 });
             } else {
-                // If no record on that day, provide smooth baseline with realistic gentle curve
-                // so the line graph renders a smooth continuous spline just like in shadcn
-                const dayOfWeek = d.getDay();
-                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                const baseStudents = isWeekend ? 0 : Math.max(0, Math.floor(Math.sin(i * 0.4) * 3 + 2));
-                const baseEmployees = isWeekend ? 0 : Math.max(0, Math.floor(Math.cos(i * 0.3) * 2 + 1));
-
                 points.push({
                     date: dateStr,
-                    total: baseStudents + baseEmployees,
-                    students: baseStudents,
-                    employees: baseEmployees,
+                    total: 0,
+                    students: 0,
+                    employees: 0,
                 });
             }
         }
@@ -123,12 +129,20 @@ export function InteractiveClinicVisitsChart({
     }, [visitTrends, recentVisits, monthlyVisits]);
 
     const totals = useMemo(() => {
+        if (visitTotals && typeof visitTotals.total === "number") {
+            return {
+                students: Number(visitTotals.students ?? 0),
+                employees: Number(visitTotals.employees ?? 0),
+                total: Number(visitTotals.total ?? 0),
+            };
+        }
+
         return {
             students: chartData.reduce((acc, curr) => acc + curr.students, 0),
             employees: chartData.reduce((acc, curr) => acc + curr.employees, 0),
             total: chartData.reduce((acc, curr) => acc + curr.total, 0),
         };
-    }, [chartData]);
+    }, [visitTotals, chartData]);
 
     const activeConfig = CHART_CONFIG[activeChart];
 

@@ -2224,6 +2224,7 @@ function Dashboard() {
                         visitTrends={dashboard?.visit_trends}
                         recentVisits={recentVisits}
                         monthlyVisits={dashboard?.monthly_visits}
+                        visitTotals={dashboard?.visit_totals}
                         loading={loading}
                     />
 
