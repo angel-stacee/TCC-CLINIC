@@ -121,6 +121,7 @@ function StudentManagement() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    const [formError, setFormError] = useState("");
     const [successToast, setSuccessToast] = useState("");
 
     const [sexFilter, setSexFilter] = useState("all");
@@ -476,6 +477,7 @@ function StudentManagement() {
 
     const openStudentForm = (student = null) => {
         setError("");
+        setFormError("");
         setEditingStudent(student);
 
         if (student) {
@@ -509,11 +511,13 @@ function StudentManagement() {
 
         setShowStudentForm(false);
         setEditingStudent(null);
+        setFormError("");
         resetAllPatientForms();
     };
 
     const openStaffForm = (person = null) => {
         setError("");
+        setFormError("");
         setEditingStaff(person);
 
         if (person) {
@@ -546,11 +550,13 @@ function StudentManagement() {
 
         setShowStaffForm(false);
         setEditingStaff(null);
+        setFormError("");
         resetAllPatientForms();
     };
 
     const openFacultyForm = (faculty = null) => {
         setError("");
+        setFormError("");
         setEditingFaculty(faculty);
 
         if (faculty) {
@@ -592,6 +598,7 @@ function StudentManagement() {
 
         setShowFacultyForm(false);
         setEditingFaculty(null);
+        setFormError("");
         resetAllPatientForms();
     };
 
@@ -853,21 +860,53 @@ function StudentManagement() {
 
         if (!/^\d+$/.test(studentForm.student_id.trim())) {
             setError("Student ID must contain numbers only.");
+            setFormError("Student ID must contain numbers only.");
+            return;
+        }
+
+        const sId = studentForm.student_id.trim();
+        const dupStudent = students.find(
+            (s: any) => String(s.student_id).trim() === sId && (!editingStudent || s.id !== editingStudent.id)
+        );
+        if (dupStudent) {
+            const name = `${dupStudent.first_name || ""} ${dupStudent.last_name || ""}`.trim();
+            const msg = `Student ID "${sId}" is already in use by student ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
+            return;
+        }
+        const dupStaff = staff.find((st: any) => String(st.staff_id).trim() === sId);
+        if (dupStaff) {
+            const name = `${dupStaff.first_name || ""} ${dupStaff.last_name || ""}`.trim();
+            const msg = `The ID "${sId}" is already in use by staff member ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
+            return;
+        }
+        const dupFaculty = faculties.find((f: any) => String(f.employee_id).trim() === sId);
+        if (dupFaculty) {
+            const name = `${dupFaculty.first_name || ""} ${dupFaculty.last_name || ""}`.trim();
+            const msg = `The ID "${sId}" is already in use by faculty member ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
             return;
         }
 
         if (!studentForm.first_name || !studentForm.first_name.trim()) {
             setError("First name is required.");
+            setFormError("First name is required.");
             return;
         }
 
         if (!studentForm.last_name || !studentForm.last_name.trim()) {
             setError("Last name is required.");
+            setFormError("Last name is required.");
             return;
         }
 
         if (!studentForm.birth_date || !/^\d{4}-\d{2}-\d{2}$/.test(studentForm.birth_date)) {
             setError("Birth date is incomplete. Please enter a complete date (Month, Day, and Year).");
+            setFormError("Birth date is incomplete. Please enter a complete date (Month, Day, and Year).");
             return;
         }
 
@@ -875,6 +914,7 @@ function StudentManagement() {
         const currYear = new Date().getFullYear();
         if (bYear < 1920 || bYear > currYear) {
             setError(`Birth year must be between 1920 and ${currYear}.`);
+            setFormError(`Birth year must be between 1920 and ${currYear}.`);
             return;
         }
 
@@ -920,31 +960,65 @@ function StudentManagement() {
 
         if (!staffForm.staff_id.trim()) {
             setError("Staff ID is required.");
+            setFormError("Staff ID is required.");
             return;
         }
 
         if (!/^\d+$/.test(staffForm.staff_id.trim())) {
             setError("Staff ID must contain numbers only.");
+            setFormError("Staff ID must contain numbers only.");
+            return;
+        }
+
+        const stId = staffForm.staff_id.trim();
+        const dupStaff = staff.find(
+            (st: any) => String(st.staff_id).trim() === stId && (!editingStaff || st.id !== editingStaff.id)
+        );
+        if (dupStaff) {
+            const name = `${dupStaff.first_name || ""} ${dupStaff.last_name || ""}`.trim();
+            const msg = `Staff ID "${stId}" is already in use by staff member ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
+            return;
+        }
+        const dupStudent = students.find((s: any) => String(s.student_id).trim() === stId);
+        if (dupStudent) {
+            const name = `${dupStudent.first_name || ""} ${dupStudent.last_name || ""}`.trim();
+            const msg = `The ID "${stId}" is already in use by student ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
+            return;
+        }
+        const dupFaculty = faculties.find((f: any) => String(f.employee_id).trim() === stId);
+        if (dupFaculty) {
+            const name = `${dupFaculty.first_name || ""} ${dupFaculty.last_name || ""}`.trim();
+            const msg = `The ID "${stId}" is already in use by faculty member ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
             return;
         }
 
         if (!staffForm.first_name.trim()) {
             setError("First name is required.");
+            setFormError("First name is required.");
             return;
         }
 
         if (!staffForm.last_name.trim()) {
             setError("Last name is required.");
+            setFormError("Last name is required.");
             return;
         }
 
         if (!staffForm.position.trim()) {
             setError("Position is required.");
+            setFormError("Position is required.");
             return;
         }
 
         if (staffForm.birth_date && !/^\d{4}-\d{2}-\d{2}$/.test(staffForm.birth_date)) {
             setError("Staff birth date is incomplete. Please enter the full Month, Day, and Year.");
+            setFormError("Staff birth date is incomplete. Please enter the full Month, Day, and Year.");
             return;
         }
 
@@ -990,31 +1064,65 @@ function StudentManagement() {
 
         if (!facultyForm.employee_id.trim()) {
             setError("Employee ID is required.");
+            setFormError("Employee ID is required.");
             return;
         }
 
         if (!/^\d+$/.test(facultyForm.employee_id.trim())) {
             setError("Employee ID must contain numbers only.");
+            setFormError("Employee ID must contain numbers only.");
+            return;
+        }
+
+        const fId = facultyForm.employee_id.trim();
+        const dupFaculty = faculties.find(
+            (f: any) => String(f.employee_id).trim() === fId && (!editingFaculty || f.id !== editingFaculty.id)
+        );
+        if (dupFaculty) {
+            const name = `${dupFaculty.first_name || ""} ${dupFaculty.last_name || ""}`.trim();
+            const msg = `Employee ID "${fId}" is already in use by faculty member ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
+            return;
+        }
+        const dupStudent = students.find((s: any) => String(s.student_id).trim() === fId);
+        if (dupStudent) {
+            const name = `${dupStudent.first_name || ""} ${dupStudent.last_name || ""}`.trim();
+            const msg = `The ID "${fId}" is already in use by student ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
+            return;
+        }
+        const dupStaff = staff.find((st: any) => String(st.staff_id).trim() === fId);
+        if (dupStaff) {
+            const name = `${dupStaff.first_name || ""} ${dupStaff.last_name || ""}`.trim();
+            const msg = `The ID "${fId}" is already in use by staff member ${name || "record"}. Please enter a different ID.`;
+            setError(msg);
+            setFormError(msg);
             return;
         }
 
         if (!facultyForm.first_name.trim()) {
             setError("First name is required.");
+            setFormError("First name is required.");
             return;
         }
 
         if (!facultyForm.last_name.trim()) {
             setError("Last name is required.");
+            setFormError("Last name is required.");
             return;
         }
 
         if (!facultyForm.position.trim()) {
             setError("Position is required.");
+            setFormError("Position is required.");
             return;
         }
 
         if (facultyForm.birth_date && !/^\d{4}-\d{2}-\d{2}$/.test(facultyForm.birth_date)) {
             setError("Faculty birth date is incomplete. Please enter the full Month, Day, and Year.");
+            setFormError("Faculty birth date is incomplete. Please enter the full Month, Day, and Year.");
             return;
         }
 
@@ -1306,15 +1414,21 @@ function StudentManagement() {
             invalidateRecordCache();
             await fetchData();
             if (completedMessage) setSuccessToast(completedMessage);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
 
-            setError(
+            const validationMsg =
+                err?.response?.data?.errors?.student_id?.[0] ||
+                err?.response?.data?.errors?.staff_id?.[0] ||
+                err?.response?.data?.errors?.employee_id?.[0] ||
                 getErrorMessage(
                     err,
                     "Unable to complete the requested action."
-                )
-            );
+                );
+
+            setError(validationMsg);
+            setFormError(validationMsg);
+            setConfirmation(null);
         } finally {
             setSaving(false);
         }
@@ -2072,6 +2186,7 @@ function StudentManagement() {
             <StudentForms
                 showStudentForm={showStudentForm}
                 editingStudent={Boolean(editingStudent)}
+                editingStudentId={editingStudent?.id}
                 closeStudentForm={closeStudentForm}
                 handleStudentSubmit={handleStudentSubmit}
                 studentForm={studentForm}
@@ -2079,17 +2194,24 @@ function StudentManagement() {
                 saving={saving}
                 showStaffForm={showStaffForm}
                 editingStaff={Boolean(editingStaff)}
+                editingStaffId={editingStaff?.id}
                 closeStaffForm={closeStaffForm}
                 handleStaffSubmit={handleStaffSubmit}
                 staffForm={staffForm}
                 setStaffForm={setStaffForm}
                 showFacultyForm={showFacultyForm}
                 editingFaculty={Boolean(editingFaculty)}
+                editingFacultyId={editingFaculty?.id}
                 closeFacultyForm={closeFacultyForm}
                 handleFacultySubmit={handleFacultySubmit}
                 facultyForm={facultyForm}
                 setFacultyForm={setFacultyForm}
                 onSwitchCategory={handleSwitchCategory}
+                serverError={formError}
+                onClearServerError={() => setFormError("")}
+                students={students}
+                staff={staff}
+                faculties={faculties}
             />
 
 

@@ -1,6 +1,7 @@
-import { useState, type Dispatch, type FormEventHandler, type SetStateAction } from "react";
+import { useState, useEffect, useCallback, type Dispatch, type FormEventHandler, type SetStateAction } from "react";
 import { GraduationCap, BookOpen, Briefcase } from "lucide-react";
 import { Modal, InputField, SelectField, DateOfBirthField } from "./FieldsAndModals";
+import api from "../../services/api";
 
 export interface StudentFormValues { student_id: string; first_name: string; middle_name: string; last_name: string; course: string; year_level: string; section: string; sex: string; birth_date: string; contact_number: string; address: string; }
 export interface StaffFormValues { staff_id: string; first_name: string; middle_name: string; last_name: string; position: string; department: string; sex: string; birth_date: string; contact_number: string; address: string; }
@@ -123,9 +124,92 @@ const validateBirthDate = (d: string) => {
     return null;
 };
 
+export const verifyPatientIdUnique = async (
+    id: string,
+    category: "student" | "staff" | "faculty",
+    excludeId?: number | null,
+    localStudents: any[] = [],
+    localStaff: any[] = [],
+    localFaculties: any[] = []
+): Promise<{ available: boolean; message?: string }> => {
+    const cleanId = (id || "").trim();
+    if (!cleanId) return { available: true };
+
+    // 1. Instant check against loaded records in memory
+    const studentMatch = localStudents.find(
+        (s) => String(s.student_id).trim() === cleanId && (category !== "student" || s.id !== excludeId)
+    );
+    if (studentMatch) {
+        const name = `${studentMatch.first_name || ""} ${studentMatch.last_name || ""}`.trim();
+        return {
+            available: false,
+            message: `Student ID "${cleanId}" is already in use by student ${name || "record"}. Please enter a different ID.`,
+        };
+    }
+
+    const staffMatch = localStaff.find(
+        (st) => String(st.staff_id).trim() === cleanId && (category !== "staff" || st.id !== excludeId)
+    );
+    if (staffMatch) {
+        const name = `${staffMatch.first_name || ""} ${staffMatch.last_name || ""}`.trim();
+        return {
+            available: false,
+            message: `The ID "${cleanId}" is already in use by staff member ${name || "record"}. Please enter a different ID.`,
+        };
+    }
+
+    const facultyMatch = localFaculties.find(
+        (f) => String(f.employee_id).trim() === cleanId && (category !== "faculty" || f.id !== excludeId)
+    );
+    if (facultyMatch) {
+        const name = `${facultyMatch.first_name || ""} ${facultyMatch.last_name || ""}`.trim();
+        return {
+            available: false,
+            message: `The ID "${cleanId}" is already in use by faculty member ${name || "record"}. Please enter a different ID.`,
+        };
+    }
+
+    // 2. Comprehensive check against database via API endpoint
+    try {
+        const res = await api.get("/patients/check-id", {
+            params: {
+                id: cleanId,
+                category,
+                exclude_id: excludeId || undefined,
+            },
+        });
+        if (res.data && res.data.available === false) {
+            return {
+                available: false,
+                message: res.data.message || `The ID "${cleanId}" is already registered. Please enter a different ID.`,
+            };
+        }
+    } catch (err) {
+        console.error("Unable to check patient ID via API:", err);
+    }
+
+    return { available: true };
+};
+
+function FormErrorBanner({ message }: { message: string }) {
+    if (!message) return null;
+    return (
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-300 bg-red-50 p-3.5 text-xs font-semibold text-red-800 shadow-sm dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+            <svg className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="flex-1">
+                <p className="font-bold text-red-900 dark:text-red-200">Patient ID / Validation Notice</p>
+                <p className="mt-0.5 leading-relaxed">{message}</p>
+            </div>
+        </div>
+    );
+}
+
 type StudentFormsProps = {
     showStudentForm: boolean;
     editingStudent: boolean;
+    editingStudentId?: number | null;
     closeStudentForm: () => void;
     handleStudentSubmit: React.FormEventHandler<HTMLFormElement>;
     studentForm: StudentFormValues;
@@ -133,17 +217,24 @@ type StudentFormsProps = {
     saving: boolean;
     showStaffForm: boolean;
     editingStaff: boolean;
+    editingStaffId?: number | null;
     closeStaffForm: () => void;
     handleStaffSubmit: React.FormEventHandler<HTMLFormElement>;
     staffForm: StaffFormValues;
     setStaffForm: React.Dispatch<React.SetStateAction<StaffFormValues>>;
     showFacultyForm: boolean;
     editingFaculty: boolean;
+    editingFacultyId?: number | null;
     closeFacultyForm: () => void;
     handleFacultySubmit: React.FormEventHandler<HTMLFormElement>;
     facultyForm: FacultyFormValues;
     setFacultyForm: React.Dispatch<React.SetStateAction<FacultyFormValues>>;
     onSwitchCategory?: (cat: "student" | "faculty" | "staff") => void;
+    serverError?: string;
+    onClearServerError?: () => void;
+    students?: any[];
+    staff?: any[];
+    faculties?: any[];
 };
 
 function PatientCategorySelector({
@@ -210,6 +301,7 @@ function PatientCategorySelector({
 export function StudentForms({
     showStudentForm,
     editingStudent,
+    editingStudentId,
     closeStudentForm,
     handleStudentSubmit,
     studentForm,
@@ -217,24 +309,70 @@ export function StudentForms({
     saving,
     showStaffForm,
     editingStaff,
+    editingStaffId,
     closeStaffForm,
     handleStaffSubmit,
     staffForm,
     setStaffForm,
     showFacultyForm,
     editingFaculty,
+    editingFacultyId,
     closeFacultyForm,
     handleFacultySubmit,
     facultyForm,
     setFacultyForm,
     onSwitchCategory,
+    serverError,
+    onClearServerError,
+    students = [],
+    staff = [],
+    faculties = [],
 }: StudentFormsProps) {
     const [localError, setLocalError] = useState("");
+    const [idError, setIdError] = useState("");
+    const [, setValidatingId] = useState(false);
 
-    const onStudentSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    useEffect(() => {
+        setLocalError("");
+        setIdError("");
+        onClearServerError?.();
+    }, [showStudentForm, showStaffForm, showFacultyForm, onClearServerError]);
+
+    const activeError = idError || localError || serverError || "";
+
+    const checkIdUniqueness = useCallback(async (
+        rawId: string,
+        category: "student" | "staff" | "faculty",
+        excludeId?: number | null
+    ) => {
+        const cleanId = (rawId || "").trim();
+        if (!cleanId || !/^\d+$/.test(cleanId)) {
+            return;
+        }
+        setValidatingId(true);
+        try {
+            const check = await verifyPatientIdUnique(cleanId, category, excludeId, students, staff, faculties);
+            if (!check.available) {
+                const msg = check.message || `ID "${cleanId}" is already in use by another patient. Please enter a different ID.`;
+                setIdError(msg);
+                setLocalError(msg);
+            } else {
+                setIdError("");
+                setLocalError((prev) => (prev && prev.includes("already in use") ? "" : prev));
+            }
+        } finally {
+            setValidatingId(false);
+        }
+    }, [students, staff, faculties]);
+
+    const onStudentSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setLocalError("");
-        if (!studentForm.student_id || studentForm.student_id.trim() === "" || !/^\d+$/.test(studentForm.student_id.trim())) {
+        setIdError("");
+        onClearServerError?.();
+
+        const sId = studentForm.student_id ? studentForm.student_id.trim() : "";
+        if (!sId || !/^\d+$/.test(sId)) {
             setLocalError("Please enter a valid Student ID (numbers only).");
             return;
         }
@@ -243,13 +381,26 @@ export function StudentForms({
             setLocalError(dateErr);
             return;
         }
+
+        const check = await verifyPatientIdUnique(sId, "student", editingStudentId, students, staff, faculties);
+        if (!check.available) {
+            const msg = check.message || `Student ID "${sId}" is already in use by another patient. Please enter a different ID.`;
+            setIdError(msg);
+            setLocalError(msg);
+            return;
+        }
+
         handleStudentSubmit(e);
     };
 
-    const onStaffSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    const onStaffSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setLocalError("");
-        if (!staffForm.staff_id || staffForm.staff_id.trim() === "" || !/^\d+$/.test(staffForm.staff_id.trim())) {
+        setIdError("");
+        onClearServerError?.();
+
+        const stId = staffForm.staff_id ? staffForm.staff_id.trim() : "";
+        if (!stId || !/^\d+$/.test(stId)) {
             setLocalError("Please enter a valid Staff ID (numbers only).");
             return;
         }
@@ -260,13 +411,26 @@ export function StudentForms({
                 return;
             }
         }
+
+        const check = await verifyPatientIdUnique(stId, "staff", editingStaffId, students, staff, faculties);
+        if (!check.available) {
+            const msg = check.message || `Staff ID "${stId}" is already in use by another patient. Please enter a different ID.`;
+            setIdError(msg);
+            setLocalError(msg);
+            return;
+        }
+
         handleStaffSubmit(e);
     };
 
-    const onFacultySubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    const onFacultySubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setLocalError("");
-        if (!facultyForm.employee_id || facultyForm.employee_id.trim() === "" || !/^\d+$/.test(facultyForm.employee_id.trim())) {
+        setIdError("");
+        onClearServerError?.();
+
+        const fId = facultyForm.employee_id ? facultyForm.employee_id.trim() : "";
+        if (!fId || !/^\d+$/.test(fId)) {
             setLocalError("Please enter a valid Employee ID (numbers only).");
             return;
         }
@@ -277,11 +441,22 @@ export function StudentForms({
                 return;
             }
         }
+
+        const check = await verifyPatientIdUnique(fId, "faculty", editingFacultyId, students, staff, faculties);
+        if (!check.available) {
+            const msg = check.message || `Employee ID "${fId}" is already in use by another patient. Please enter a different ID.`;
+            setIdError(msg);
+            setLocalError(msg);
+            return;
+        }
+
         handleFacultySubmit(e);
     };
 
     const resetForms = () => {
         setLocalError("");
+        setIdError("");
+        onClearServerError?.();
         setStudentForm({
             student_id: "",
             first_name: "",
@@ -431,14 +606,7 @@ export function StudentForms({
                             />
                         )}
 
-                        {localError && (
-                            <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
-                                <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>{localError}</span>
-                            </div>
-                        )}
+                        <FormErrorBanner message={activeError} />
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <InputField
@@ -505,25 +673,40 @@ export function StudentForms({
                                 value={
                                     studentForm.student_id
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                    setIdError("");
+                                    setLocalError("");
+                                    onClearServerError?.();
                                     setStudentForm({
                                         ...studentForm,
                                         student_id:
                                             sanitizeNumericId(e.target.value),
-                                    })
-                                }
+                                    });
+                                }}
+                                onBlur={() => {
+                                    if (studentForm.student_id) {
+                                        checkIdUniqueness(studentForm.student_id, "student", editingStudentId);
+                                    }
+                                }}
                                 onKeyDown={allowOnlyDigitsKeyDown}
                                 onBeforeInput={allowOnlyDigitsBeforeInput}
                                 onPaste={(e) => {
                                     e.preventDefault();
                                     const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
                                     setStudentForm({ ...studentForm, student_id: text });
+                                    setIdError("");
+                                    setLocalError("");
+                                    onClearServerError?.();
+                                    if (text) {
+                                        checkIdUniqueness(text, "student", editingStudentId);
+                                    }
                                 }}
                                 inputMode="numeric"
                                 pattern="[0-9]*"
                                 placeholder="e.g. 20241041"
                                 maxLength={15}
                                 required
+                                error={idError}
                             />
 
                             <SelectField
@@ -691,14 +874,7 @@ export function StudentForms({
                             />
                         )}
 
-                        {localError && (
-                            <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
-                                <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>{localError}</span>
-                            </div>
-                        )}
+                        <FormErrorBanner message={activeError} />
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <InputField
@@ -765,25 +941,40 @@ export function StudentForms({
                                 value={
                                     staffForm.staff_id
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                    setIdError("");
+                                    setLocalError("");
+                                    onClearServerError?.();
                                     setStaffForm({
                                         ...staffForm,
                                         staff_id:
                                             sanitizeNumericId(e.target.value),
-                                    })
-                                }
+                                    });
+                                }}
+                                onBlur={() => {
+                                    if (staffForm.staff_id) {
+                                        checkIdUniqueness(staffForm.staff_id, "staff", editingStaffId);
+                                    }
+                                }}
                                 onKeyDown={allowOnlyDigitsKeyDown}
                                 onBeforeInput={allowOnlyDigitsBeforeInput}
                                 onPaste={(e) => {
                                     e.preventDefault();
                                     const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
                                     setStaffForm({ ...staffForm, staff_id: text });
+                                    setIdError("");
+                                    setLocalError("");
+                                    onClearServerError?.();
+                                    if (text) {
+                                        checkIdUniqueness(text, "staff", editingStaffId);
+                                    }
                                 }}
                                 inputMode="numeric"
                                 pattern="[0-9]*"
                                 placeholder="e.g. 10023"
                                 maxLength={15}
                                 required
+                                error={idError}
                             />
 
                             <SelectField
@@ -928,14 +1119,7 @@ export function StudentForms({
                             />
                         )}
 
-                        {localError && (
-                            <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
-                                <svg className="h-4 w-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>{localError}</span>
-                            </div>
-                        )}
+                        <FormErrorBanner message={activeError} />
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <InputField
@@ -1002,25 +1186,40 @@ export function StudentForms({
                                 value={
                                     facultyForm.employee_id
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                    setIdError("");
+                                    setLocalError("");
+                                    onClearServerError?.();
                                     setFacultyForm({
                                         ...facultyForm,
                                         employee_id:
                                             sanitizeNumericId(e.target.value),
-                                    })
-                                }
+                                    });
+                                }}
+                                onBlur={() => {
+                                    if (facultyForm.employee_id) {
+                                        checkIdUniqueness(facultyForm.employee_id, "faculty", editingFacultyId);
+                                    }
+                                }}
                                 onKeyDown={allowOnlyDigitsKeyDown}
                                 onBeforeInput={allowOnlyDigitsBeforeInput}
                                 onPaste={(e) => {
                                     e.preventDefault();
                                     const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 15);
                                     setFacultyForm({ ...facultyForm, employee_id: text });
+                                    setIdError("");
+                                    setLocalError("");
+                                    onClearServerError?.();
+                                    if (text) {
+                                        checkIdUniqueness(text, "faculty", editingFacultyId);
+                                    }
                                 }}
                                 inputMode="numeric"
                                 pattern="[0-9]*"
                                 placeholder="e.g. 20045"
                                 maxLength={15}
                                 required
+                                error={idError}
                             />
 
 

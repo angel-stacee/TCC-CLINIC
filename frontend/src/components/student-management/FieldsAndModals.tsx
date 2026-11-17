@@ -7,6 +7,7 @@ interface InputFieldProps {
     onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
     onBeforeInput?: React.FormEventHandler<HTMLInputElement>;
     onPaste?: React.ClipboardEventHandler<HTMLInputElement>;
+    onBlur?: React.FocusEventHandler<HTMLInputElement>;
     type?: string;
     required?: boolean;
     placeholder?: string;
@@ -31,6 +32,7 @@ export function InputField({
     onKeyDown,
     onBeforeInput,
     onPaste,
+    onBlur,
     type = "text",
     required = false,
     placeholder = "",
@@ -59,6 +61,7 @@ export function InputField({
                 onKeyDown={onKeyDown}
                 onBeforeInput={onBeforeInput}
                 onPaste={onPaste}
+                onBlur={onBlur}
                 required={required}
                 placeholder={placeholder}
                 disabled={disabled}
