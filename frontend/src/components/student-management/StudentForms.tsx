@@ -75,7 +75,7 @@ const DEPARTMENTS = [
     "Security & Safety Unit",
 ];
 
-// All patient IDs (Student ID, Staff ID, Faculty Employee ID): strictly digits (numbers) only, no letters, no special characters!
+// All patient IDs (Student ID, Staff ID, Faculty ID): strictly digits (numbers) only, no letters, no special characters!
 const sanitizeNumericId = (val: string) => val.replace(/[^0-9]/g, "").slice(0, 15);
 
 // Keydown handler allowing only numeric keys, control keys, and clipboard shortcuts
@@ -431,7 +431,7 @@ export function StudentForms({
 
         const fId = facultyForm.employee_id ? facultyForm.employee_id.trim() : "";
         if (!fId || !/^\d+$/.test(fId)) {
-            setLocalError("Please enter a valid Employee ID (numbers only).");
+            setLocalError("Please enter a valid Faculty ID (numbers only).");
             return;
         }
         if (facultyForm.birth_date) {
@@ -444,7 +444,7 @@ export function StudentForms({
 
         const check = await verifyPatientIdUnique(fId, "faculty", editingFacultyId, students, staff, faculties);
         if (!check.available) {
-            const msg = check.message || `Employee ID "${fId}" is already in use by another patient. Please enter a different ID.`;
+            const msg = check.message || `Faculty ID "${fId}" is already in use by another patient. Please enter a different ID.`;
             setIdError(msg);
             setLocalError(msg);
             return;
@@ -1182,7 +1182,7 @@ export function StudentForms({
                             />
 
                             <InputField
-                                label="Employee ID"
+                                label="Faculty ID"
                                 value={
                                     facultyForm.employee_id
                                 }

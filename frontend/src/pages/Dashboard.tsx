@@ -142,7 +142,7 @@ const TYPE_LABELS = {
 const TYPE_ID_LABELS = {
     student: "Student ID",
     staff: "Staff ID",
-    faculty: "Employee ID",
+    faculty: "Faculty ID",
 };
 
 const formatDate = (raw) => {

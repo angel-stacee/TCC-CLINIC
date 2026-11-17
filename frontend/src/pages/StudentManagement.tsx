@@ -1095,14 +1095,14 @@ function StudentManagement() {
         setError("");
 
         if (!facultyForm.employee_id.trim()) {
-            setError("Employee ID is required.");
-            setFormError("Employee ID is required.");
+            setError("Faculty ID is required.");
+            setFormError("Faculty ID is required.");
             return;
         }
 
         if (!/^\d+$/.test(facultyForm.employee_id.trim())) {
-            setError("Employee ID must contain numbers only.");
-            setFormError("Employee ID must contain numbers only.");
+            setError("Faculty ID must contain numbers only.");
+            setFormError("Faculty ID must contain numbers only.");
             return;
         }
 
@@ -1112,7 +1112,7 @@ function StudentManagement() {
         );
         if (dupFaculty) {
             const name = `${dupFaculty.first_name || ""} ${dupFaculty.last_name || ""}`.trim();
-            const msg = `Employee ID "${fId}" is already in use by faculty member ${name || "record"}. Please enter a different ID.`;
+            const msg = `Faculty ID "${fId}" is already in use by faculty member ${name || "record"}. Please enter a different ID.`;
             setError(msg);
             setFormError(msg);
             return;
@@ -2171,7 +2171,7 @@ function StudentManagement() {
                                         <thead className="border-b border-[#e8dfd4] bg-[#fcfaf6] text-xs font-bold uppercase tracking-wider text-[#887d70] dark:border-[#4e4234] dark:bg-[#29231d] dark:text-[#c4b5a5]">
                                             <tr>
                                                 <th className="px-5 py-3.5">
-                                                    Employee ID
+                                                    Faculty ID
                                                 </th>
 
                                                 <th className="px-5 py-3.5">
@@ -2690,7 +2690,7 @@ function StudentManagement() {
                             </p>
 
                             <span className="mt-3 inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                                Employee ID:{" "}
+                                Faculty ID:{" "}
                                 {
                                     viewingFaculty.employee_id
                                 }
@@ -2710,7 +2710,7 @@ function StudentManagement() {
                                 />
 
                                 <InfoItem
-                                    label="Employee ID"
+                                    label="Faculty ID"
                                     value={
                                         viewingFaculty.employee_id
                                     }
