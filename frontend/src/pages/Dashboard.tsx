@@ -2024,7 +2024,7 @@ function Dashboard() {
                         return (
                             <div
                                 key={item.label}
-                                className={`flex min-h-[148px] flex-col justify-between rounded-2xl border border-[#eee7de] bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                                className={`flex min-h-[148px] flex-col justify-between rounded-2xl border border-[#eee7de] bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-[#382f25] dark:bg-[#251f19] ${
                                     loading ? "" : "fade-in-up"
                                 }`}
                                 style={
@@ -2035,10 +2035,10 @@ function Dashboard() {
                                           }
                                 }
                             >
-                                {/* Top row: Icon + Title on left, Mini bar chart on right */}
+                                {/* Top row: Icon + Title on left, Multiple Mini bar chart on right */}
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#faeaec] text-[#731124]">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#faeaec] text-[#731124] dark:bg-[#342a22] dark:text-[#d4b996]">
                                             <Icon
                                                 size={18}
                                                 strokeWidth={2.2}
@@ -2046,16 +2046,16 @@ function Dashboard() {
                                             />
                                         </div>
 
-                                        <span className="text-[15px] font-bold tracking-tight text-[#1e1b18]">
+                                        <span className="text-[15px] font-bold tracking-tight text-[#1e1b18] dark:text-[#f4ecdf]">
                                             {item.label}
                                         </span>
                                     </div>
 
-                                    {/* Mini 6-month bar chart with rounded pill bars */}
+                                    {/* Multiple Mini bar chart with paired maroon bars */}
                                     <MiniBarChart
                                         data={item.barData}
-                                        activeColor="#731124"
-                                        inactiveColor="#f4d7dd"
+                                        bar1Color="#c44d58"
+                                        bar2Color="#70091f"
                                     />
                                 </div>
 
@@ -2064,7 +2064,7 @@ function Dashboard() {
                                     {loading ? (
                                         <Skeleton className="h-8 w-16" />
                                     ) : (
-                                        <p className="text-3xl font-extrabold leading-none tracking-tight tabular-nums text-[#1a1412]">
+                                        <p className="text-3xl font-extrabold leading-none tracking-tight tabular-nums text-[#1a1412] dark:text-[#f4ecdf]">
                                             {item.value}
                                         </p>
                                     )}
@@ -2076,7 +2076,7 @@ function Dashboard() {
                                                 {change !== null && change > 0 ? change : 0}%
                                             </span>
                                         </span>
-                                        <span className="font-normal text-[#9c8e82]">
+                                        <span className="font-normal text-[#9c8e82] dark:text-stone-400">
                                             vs last month
                                         </span>
                                     </div>
