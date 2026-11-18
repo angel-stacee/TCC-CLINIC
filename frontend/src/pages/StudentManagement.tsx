@@ -4,7 +4,7 @@ import { BookOpen, Briefcase, CheckCircle2, ChevronDown, GraduationCap, RotateCc
 import api from "../services/api";
 import { getCachedRecord, invalidateRecordCache } from "../services/recordCache";
 import { ConfirmationModal, InfoItem, Modal, RecordSection } from "../components/student-management/FieldsAndModals";
-import { StudentForms, type StudentFormValues, type StaffFormValues, type FacultyFormValues } from "../components/student-management/StudentForms";
+import { StudentForms, validateContactNumber, type StudentFormValues, type StaffFormValues, type FacultyFormValues } from "../components/student-management/StudentForms";
 import FloatingToast from "../components/common/FloatingToast";
 import { addClinicNotification } from "../services/notifications";
 
@@ -950,6 +950,13 @@ function StudentManagement() {
             return;
         }
 
+        const phoneErr = validateContactNumber(studentForm.contact_number, true);
+        if (phoneErr) {
+            setError(phoneErr);
+            setFormError(phoneErr);
+            return;
+        }
+
         setConfirmation({
             type: editingStudent
                 ? "updateStudent"
@@ -1051,6 +1058,13 @@ function StudentManagement() {
         if (staffForm.birth_date && !/^\d{4}-\d{2}-\d{2}$/.test(staffForm.birth_date)) {
             setError("Staff birth date is incomplete. Please enter the full Month, Day, and Year.");
             setFormError("Staff birth date is incomplete. Please enter the full Month, Day, and Year.");
+            return;
+        }
+
+        const phoneErr = validateContactNumber(staffForm.contact_number, true);
+        if (phoneErr) {
+            setError(phoneErr);
+            setFormError(phoneErr);
             return;
         }
 
@@ -1156,6 +1170,15 @@ function StudentManagement() {
             setError("Faculty birth date is incomplete. Please enter the full Month, Day, and Year.");
             setFormError("Faculty birth date is incomplete. Please enter the full Month, Day, and Year.");
             return;
+        }
+
+        if (facultyForm.contact_number && facultyForm.contact_number.trim() !== "") {
+            const phoneErr = validateContactNumber(facultyForm.contact_number, false);
+            if (phoneErr) {
+                setError(phoneErr);
+                setFormError(phoneErr);
+                return;
+            }
         }
 
         setConfirmation({

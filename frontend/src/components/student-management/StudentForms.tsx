@@ -101,8 +101,101 @@ const allowOnlyDigitsBeforeInput = (e: React.FormEvent<HTMLInputElement> & { dat
 // Disallow numbers and special characters for names (allows letters, spaces, hyphens, periods, apostrophes, and Philippine letters like ñ/Ñ)
 const sanitizeName = (val: string) => val.replace(/[0-9]/g, "").replace(/[^a-zA-Z\sñÑ\-.']/g, "");
 
-// Contact numbers: strictly digits (numbers) only, maximum of 11 numbers (e.g. 09123456789)
-const sanitizePhone = (val: string) => val.replace(/[^0-9]/g, "").slice(0, 11);
+// Contact numbers: strictly numbers starting with 09 and maximum of 11 digits (e.g. 09532812400)
+export const sanitizePhone = (val: string) => {
+    let clean = val.replace(/[^0-9]/g, "");
+    if (!clean) return "";
+    if (clean.startsWith("639")) {
+        clean = "09" + clean.slice(3);
+    }
+    // Only allow starting with 0
+    if (clean[0] !== "0") {
+        return "";
+    }
+    // If 2 or more digits, second digit must be 9
+    if (clean.length >= 2 && clean[1] !== "9") {
+        return "0";
+    }
+    return clean.slice(0, 11);
+};
+
+export const validateContactNumber = (phone: string, required = true): string | null => {
+    const clean = (phone || "").trim();
+    if (!clean) {
+        return required ? "Contact number is required." : null;
+    }
+    if (!clean.startsWith("09")) {
+        return "Contact number must start with 09 (e.g. 09532812400).";
+    }
+    if (clean.length !== 11) {
+        return "Contact number must be exactly 11 digits starting with 09 (e.g. 09532812400).";
+    }
+    if (!/^09\d{9}$/.test(clean)) {
+        return "Contact number must contain numbers only starting with 09 (e.g. 09532812400).";
+    }
+    return null;
+};
+
+const allowOnlyPhoneKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (
+        e.key === "Backspace" ||
+        e.key === "Delete" ||
+        e.key === "Tab" ||
+        e.key === "Escape" ||
+        e.key === "Enter" ||
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight" ||
+        e.key === "Home" ||
+        e.key === "End" ||
+        ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x", "z", "r"].includes(e.key.toLowerCase()))
+    ) {
+        return;
+    }
+
+    if (!/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        return;
+    }
+
+    const input = e.currentTarget;
+    const currentVal = input.value;
+    const selStart = input.selectionStart ?? 0;
+    const selEnd = input.selectionEnd ?? 0;
+
+    // Disallow typing anything other than 0 at position 0
+    if (selStart === 0 && (selEnd > 0 || currentVal.length === 0) && e.key !== "0") {
+        e.preventDefault();
+        return;
+    }
+    if (selStart === 0 && e.key !== "0") {
+        e.preventDefault();
+        return;
+    }
+
+    // Disallow typing anything other than 9 at position 1 if starting with 0
+    if (selStart === 1 && currentVal.startsWith("0") && e.key !== "9") {
+        e.preventDefault();
+        return;
+    }
+};
+
+const allowOnlyPhoneBeforeInput = (e: React.FormEvent<HTMLInputElement> & { data?: string }) => {
+    if (!e.data) return;
+    if (!/^[0-9]+$/.test(e.data)) {
+        e.preventDefault();
+        return;
+    }
+    const input = e.currentTarget as HTMLInputElement;
+    const selStart = input.selectionStart ?? 0;
+    if (selStart === 0 && e.data[0] !== "0") {
+        e.preventDefault();
+        return;
+    }
+    if (selStart === 1 && input.value.startsWith("0") && e.data[0] !== "9") {
+        e.preventDefault();
+        return;
+    }
+};
 
 // Date constraints
 const TODAY = new Date().toISOString().split("T")[0];
@@ -330,15 +423,17 @@ export function StudentForms({
 }: StudentFormsProps) {
     const [localError, setLocalError] = useState("");
     const [idError, setIdError] = useState("");
+    const [phoneError, setPhoneError] = useState("");
     const [, setValidatingId] = useState(false);
 
     useEffect(() => {
         setLocalError("");
         setIdError("");
+        setPhoneError("");
         onClearServerError?.();
     }, [showStudentForm, showStaffForm, showFacultyForm, onClearServerError]);
 
-    const activeError = idError || localError || serverError || "";
+    const activeError = idError || phoneError || localError || serverError || "";
 
     const checkIdUniqueness = useCallback(async (
         rawId: string,
@@ -369,6 +464,7 @@ export function StudentForms({
         e.preventDefault();
         setLocalError("");
         setIdError("");
+        setPhoneError("");
         onClearServerError?.();
 
         const sId = studentForm.student_id ? studentForm.student_id.trim() : "";
@@ -379,6 +475,13 @@ export function StudentForms({
         const dateErr = validateBirthDate(studentForm.birth_date);
         if (dateErr) {
             setLocalError(dateErr);
+            return;
+        }
+
+        const phoneErr = validateContactNumber(studentForm.contact_number, true);
+        if (phoneErr) {
+            setPhoneError(phoneErr);
+            setLocalError(phoneErr);
             return;
         }
 
@@ -397,6 +500,7 @@ export function StudentForms({
         e.preventDefault();
         setLocalError("");
         setIdError("");
+        setPhoneError("");
         onClearServerError?.();
 
         const stId = staffForm.staff_id ? staffForm.staff_id.trim() : "";
@@ -410,6 +514,13 @@ export function StudentForms({
                 setLocalError(dateErr);
                 return;
             }
+        }
+
+        const phoneErr = validateContactNumber(staffForm.contact_number, true);
+        if (phoneErr) {
+            setPhoneError(phoneErr);
+            setLocalError(phoneErr);
+            return;
         }
 
         const check = await verifyPatientIdUnique(stId, "staff", editingStaffId, students, staff, faculties);
@@ -427,6 +538,7 @@ export function StudentForms({
         e.preventDefault();
         setLocalError("");
         setIdError("");
+        setPhoneError("");
         onClearServerError?.();
 
         const fId = facultyForm.employee_id ? facultyForm.employee_id.trim() : "";
@@ -438,6 +550,15 @@ export function StudentForms({
             const dateErr = validateBirthDate(facultyForm.birth_date);
             if (dateErr) {
                 setLocalError(dateErr);
+                return;
+            }
+        }
+
+        if (facultyForm.contact_number && facultyForm.contact_number.trim() !== "") {
+            const phoneErr = validateContactNumber(facultyForm.contact_number, false);
+            if (phoneErr) {
+                setPhoneError(phoneErr);
+                setLocalError(phoneErr);
                 return;
             }
         }
@@ -456,6 +577,7 @@ export function StudentForms({
     const resetForms = () => {
         setLocalError("");
         setIdError("");
+        setPhoneError("");
         onClearServerError?.();
         setStudentForm({
             student_id: "",
@@ -791,29 +913,52 @@ export function StudentForms({
 
                             <InputField
                                 label="Contact Number"
-                                value={
-                                    studentForm.contact_number
-                                }
-                                onChange={(e) =>
+                                value={studentForm.contact_number}
+                                onChange={(e) => {
+                                    const text = sanitizePhone(e.target.value);
                                     setStudentForm({
                                         ...studentForm,
-                                        contact_number:
-                                            sanitizePhone(e.target.value),
-                                    })
-                                }
-                                onKeyDown={allowOnlyDigitsKeyDown}
-                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                        contact_number: text,
+                                    });
+                                    if (text && text.length === 11) {
+                                        setPhoneError("");
+                                        setLocalError((prev) => (prev && prev.includes("Contact number") ? "" : prev));
+                                    } else if (!text && e.target.value.trim()) {
+                                        setPhoneError("Contact number must start with 09 (e.g. 09532812400)");
+                                    } else {
+                                        setPhoneError("");
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if (studentForm.contact_number) {
+                                        const err = validateContactNumber(studentForm.contact_number, true);
+                                        setPhoneError(err || "");
+                                    } else {
+                                        setPhoneError("");
+                                    }
+                                }}
+                                onKeyDown={allowOnlyPhoneKeyDown}
+                                onBeforeInput={allowOnlyPhoneBeforeInput}
                                 onPaste={(e) => {
                                     e.preventDefault();
-                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 11);
+                                    const raw = e.clipboardData.getData("text");
+                                    const text = sanitizePhone(raw);
                                     setStudentForm({ ...studentForm, contact_number: text });
+                                    if (!text && raw.trim()) {
+                                        setPhoneError("Contact number must start with 09 (e.g. 09532812400)");
+                                    } else if (text && text.length < 11) {
+                                        setPhoneError("Contact number must be 11 digits starting with 09 (e.g. 09532812400)");
+                                    } else {
+                                        setPhoneError("");
+                                    }
                                 }}
                                 type="text"
                                 inputMode="numeric"
-                                pattern="[0-9]*"
-                                placeholder="e.g. 09123456789"
+                                pattern="09[0-9]{9}"
+                                placeholder="e.g. 09532812400"
                                 maxLength={11}
                                 required
+                                error={phoneError}
                             />
 
                             <div className="md:col-span-2">
@@ -1038,28 +1183,52 @@ export function StudentForms({
 
                             <InputField
                                 label="Contact Number"
-                                value={
-                                    staffForm.contact_number
-                                }
-                                onChange={(e) =>
+                                value={staffForm.contact_number}
+                                onChange={(e) => {
+                                    const text = sanitizePhone(e.target.value);
                                     setStaffForm({
                                         ...staffForm,
-                                        contact_number:
-                                            sanitizePhone(e.target.value),
-                                    })
-                                }
-                                onKeyDown={allowOnlyDigitsKeyDown}
-                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                        contact_number: text,
+                                    });
+                                    if (text && text.length === 11) {
+                                        setPhoneError("");
+                                        setLocalError((prev) => (prev && prev.includes("Contact number") ? "" : prev));
+                                    } else if (!text && e.target.value.trim()) {
+                                        setPhoneError("Contact number must start with 09 (e.g. 09532812400)");
+                                    } else {
+                                        setPhoneError("");
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if (staffForm.contact_number) {
+                                        const err = validateContactNumber(staffForm.contact_number, true);
+                                        setPhoneError(err || "");
+                                    } else {
+                                        setPhoneError("");
+                                    }
+                                }}
+                                onKeyDown={allowOnlyPhoneKeyDown}
+                                onBeforeInput={allowOnlyPhoneBeforeInput}
                                 onPaste={(e) => {
                                     e.preventDefault();
-                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 11);
+                                    const raw = e.clipboardData.getData("text");
+                                    const text = sanitizePhone(raw);
                                     setStaffForm({ ...staffForm, contact_number: text });
+                                    if (!text && raw.trim()) {
+                                        setPhoneError("Contact number must start with 09 (e.g. 09532812400)");
+                                    } else if (text && text.length < 11) {
+                                        setPhoneError("Contact number must be 11 digits starting with 09 (e.g. 09532812400)");
+                                    } else {
+                                        setPhoneError("");
+                                    }
                                 }}
                                 type="text"
                                 inputMode="numeric"
-                                pattern="[0-9]*"
-                                placeholder="e.g. 09123456789"
+                                pattern="09[0-9]{9}"
+                                placeholder="e.g. 09532812400"
                                 maxLength={11}
+                                required
+                                error={phoneError}
                             />
 
                             <div className="md:col-span-2">
@@ -1287,28 +1456,51 @@ export function StudentForms({
 
                             <InputField
                                 label="Contact Number"
-                                value={
-                                    facultyForm.contact_number
-                                }
-                                onChange={(e) =>
+                                value={facultyForm.contact_number}
+                                onChange={(e) => {
+                                    const text = sanitizePhone(e.target.value);
                                     setFacultyForm({
                                         ...facultyForm,
-                                        contact_number:
-                                            sanitizePhone(e.target.value),
-                                    })
-                                }
-                                onKeyDown={allowOnlyDigitsKeyDown}
-                                onBeforeInput={allowOnlyDigitsBeforeInput}
+                                        contact_number: text,
+                                    });
+                                    if (text && text.length === 11) {
+                                        setPhoneError("");
+                                        setLocalError((prev) => (prev && prev.includes("Contact number") ? "" : prev));
+                                    } else if (!text && e.target.value.trim()) {
+                                        setPhoneError("Contact number must start with 09 (e.g. 09532812400)");
+                                    } else {
+                                        setPhoneError("");
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if (facultyForm.contact_number) {
+                                        const err = validateContactNumber(facultyForm.contact_number, false);
+                                        setPhoneError(err || "");
+                                    } else {
+                                        setPhoneError("");
+                                    }
+                                }}
+                                onKeyDown={allowOnlyPhoneKeyDown}
+                                onBeforeInput={allowOnlyPhoneBeforeInput}
                                 onPaste={(e) => {
                                     e.preventDefault();
-                                    const text = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 11);
+                                    const raw = e.clipboardData.getData("text");
+                                    const text = sanitizePhone(raw);
                                     setFacultyForm({ ...facultyForm, contact_number: text });
+                                    if (!text && raw.trim()) {
+                                        setPhoneError("Contact number must start with 09 (e.g. 09532812400)");
+                                    } else if (text && text.length < 11) {
+                                        setPhoneError("Contact number must be 11 digits starting with 09 (e.g. 09532812400)");
+                                    } else {
+                                        setPhoneError("");
+                                    }
                                 }}
                                 type="text"
                                 inputMode="numeric"
-                                pattern="[0-9]*"
-                                placeholder="e.g. 09123456789"
+                                pattern="09[0-9]{9}"
+                                placeholder="e.g. 09532812400"
                                 maxLength={11}
+                                error={phoneError}
                             />
 
 
