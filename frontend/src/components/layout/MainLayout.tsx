@@ -18,7 +18,7 @@ function MainLayout({ children }: MainLayoutProps): React.JSX.Element {
         setIsPageTransitioning(true);
         const timer = setTimeout(() => {
             setIsPageTransitioning(false);
-        }, 400);
+        }, 120);
         return () => clearTimeout(timer);
     }, [location.pathname]);
 
@@ -96,7 +96,7 @@ function MainLayout({ children }: MainLayoutProps): React.JSX.Element {
             <main className="min-h-screen w-full pt-16 lg:ml-[264px] lg:w-[calc(100%-264px)] lg:pt-0">
                 <div className="w-full max-w-full">
                     <ErrorBoundary>
-                        <Suspense key={location.pathname} fallback={<PageLoadingContent />}>
+                        <Suspense fallback={<PageLoadingContent />}>
                             {children || <Outlet />}
                         </Suspense>
                     </ErrorBoundary>

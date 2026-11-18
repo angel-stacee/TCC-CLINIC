@@ -40,6 +40,20 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): React.JSX.Eleme
         setPendingPath(null);
     }, [location.pathname]);
 
+    // Prefetch all other route chunks on browser idle so clicks load instantaneously
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            Object.values(routePrefetchers).forEach((prefetch) => {
+                try {
+                    prefetch();
+                } catch {
+                    // ignore
+                }
+            });
+        }, 1200);
+        return () => clearTimeout(timer);
+    }, []);
+
     const handleLogout = async () => {
         if (setSidebarOpen) {
             setSidebarOpen(false);

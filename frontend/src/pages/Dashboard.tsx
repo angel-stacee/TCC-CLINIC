@@ -277,9 +277,17 @@ function Dashboard() {
     const searchBoxRef = useRef(null);
     const bellRef = useRef(null);
 
-    const [dashboard, setDashboard] = useState(
-        () => peekCachedRecord<any>("dashboard")?.data || null
-    );
+    const [dashboard, setDashboard] = useState<any>(() => {
+        const inMem = peekCachedRecord<any>("dashboard")?.data;
+        if (inMem) return inMem;
+        try {
+            const saved = localStorage.getItem("tcc-dashboard-persisted");
+            if (saved) return JSON.parse(saved);
+        } catch {
+            // ignore
+        }
+        return null;
+    });
     const [students, setStudents] = useState([]);
     const [staff, setStaff] = useState([]);
     const [faculties, setFaculties] = useState([]);
@@ -328,8 +336,14 @@ function Dashboard() {
         };
     }, []);
     const [loading, setLoading] = useState(() => {
-        // Keep navigation responsive when this session already has dashboard data.
-        return !peekCachedRecord<any>("dashboard");
+        // Keep navigation and initial load instant when cached data exists
+        if (peekCachedRecord<any>("dashboard")) return false;
+        try {
+            if (localStorage.getItem("tcc-dashboard-persisted")) return false;
+        } catch {
+            // ignore
+        }
+        return true;
     });
     const [error, setError] = useState(false);
     const [selectedDate, setSelectedDate] = useState(() =>
@@ -423,6 +437,11 @@ function Dashboard() {
             const response = await getCachedRecord("dashboard", () => api.get("/dashboard"));
             const data = response.data;
             setDashboard(data);
+            try {
+                localStorage.setItem("tcc-dashboard-persisted", JSON.stringify(data));
+            } catch {
+                // ignore
+            }
             localStorage.removeItem("tcc-dashboard-cache");
 
             // Automatic notification for expired medicines on dashboard load
